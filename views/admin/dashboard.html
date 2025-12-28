@@ -9,9 +9,9 @@
             <h1 class="app-header-title">Dashboard</h1>
         </div>
         <div class="app-header-actions">
-            <button class="app-header-btn relative">
+            <button class="app-header-btn relative" id="notifications-btn">
                 <span class="material-symbols-outlined">notifications</span>
-                <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full animate-pulse"></span>
+                <span id="notifications-badge" class="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full animate-pulse hidden"></span>
             </button>
             <button class="app-header-btn text-danger" data-logout title="Sair">
                 <span class="material-symbols-outlined">logout</span>
@@ -24,14 +24,14 @@
         <!-- Welcome -->
         <div class="space-y-1">
             <p class="text-sm text-muted font-medium">Bem-vindo de volta,</p>
-            <h2 class="text-2xl font-bold">Administrador</h2>
+            <h2 class="text-2xl font-bold" id="admin-name">Administrador</h2>
         </div>
 
         <!-- Period Selector -->
         <div class="period-selector">
-            <button class="period-option active">Hoje</button>
-            <button class="period-option">Semana</button>
-            <button class="period-option">Mes</button>
+            <button class="period-option active" data-period="today">Hoje</button>
+            <button class="period-option" data-period="week">Semana</button>
+            <button class="period-option" data-period="month">Mes</button>
         </div>
 
         <!-- Stats Grid -->
@@ -43,10 +43,10 @@
                         <span class="material-symbols-outlined">payments</span>
                     </div>
                 </div>
-                <div class="stats-card-value">R$ 4.250</div>
+                <div class="stats-card-value" id="stat-total-sales">R$ 0,00</div>
                 <div class="stats-card-trend up">
                     <span class="material-symbols-outlined">trending_up</span>
-                    +12%
+                    <span id="stat-sales-trend">+0%</span>
                 </div>
             </div>
             <div class="stats-card">
@@ -56,23 +56,22 @@
                         <span class="material-symbols-outlined">receipt_long</span>
                     </div>
                 </div>
-                <div class="stats-card-value">R$ 45,00</div>
+                <div class="stats-card-value" id="stat-ticket-medio">R$ 0,00</div>
                 <div class="stats-card-trend up">
                     <span class="material-symbols-outlined">trending_up</span>
-                    +2%
+                    <span>+0%</span>
                 </div>
             </div>
-            <div class="stats-card border-danger/20 bg-danger/5">
+            <div class="stats-card" id="divergence-card">
                 <div class="stats-card-header">
-                    <span class="stats-card-label text-danger">Divergencias</span>
-                    <div class="stats-card-icon text-danger">
+                    <span class="stats-card-label">Divergencias</span>
+                    <div class="stats-card-icon">
                         <span class="material-symbols-outlined">warning</span>
                     </div>
                 </div>
-                <div class="stats-card-value text-danger">-R$ 12,50</div>
-                <div class="stats-card-trend down">
-                    <span class="material-symbols-outlined">trending_down</span>
-                    -5%
+                <div class="stats-card-value" id="stat-divergence">R$ 0,00</div>
+                <div class="stats-card-trend">
+                    <span class="text-xs text-muted">no periodo</span>
                 </div>
             </div>
             <div class="stats-card">
@@ -82,7 +81,7 @@
                         <span class="material-symbols-outlined">groups</span>
                     </div>
                 </div>
-                <div class="stats-card-value">5</div>
+                <div class="stats-card-value" id="stat-active-shifts">0</div>
                 <span class="text-xs text-muted">Funcionarios</span>
             </div>
         </div>
@@ -94,40 +93,47 @@
                 <p class="text-xs text-muted">Hoje vs. Media</p>
             </div>
             <div class="p-4">
-                <div class="h-40 flex items-end justify-between gap-2">
-                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
-                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 40%"></div>
+                <div id="sales-chart" class="h-40 flex items-end justify-between gap-2">
+                    <!-- Chart will be rendered here -->
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
+                        </div>
+                        <span class="text-xs text-muted">08h</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
                         </div>
                         <span class="text-xs text-muted">10h</span>
                     </div>
-                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
-                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 65%"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
                         </div>
                         <span class="text-xs text-muted">12h</span>
                     </div>
-                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
-                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 85%"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
                         </div>
                         <span class="text-xs text-muted">14h</span>
                     </div>
-                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
-                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 55%"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
                         </div>
                         <span class="text-xs text-muted">16h</span>
                     </div>
-                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
-                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 70%"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
                         </div>
                         <span class="text-xs text-muted">18h</span>
                     </div>
-                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
-                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 30%"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 0%"></div>
                         </div>
                         <span class="text-xs text-muted">20h</span>
                     </div>
@@ -139,26 +145,12 @@
         <div class="space-y-3">
             <div class="flex items-center justify-between px-1">
                 <h3 class="font-semibold">Alertas e Divergencias</h3>
-                <span class="badge badge-danger">2 Novos</span>
+                <span class="badge badge-danger" id="alerts-count">0 Novos</span>
             </div>
-            <div class="space-y-2">
-                <div class="alert-card error">
-                    <div class="alert-card-icon">
-                        <span class="material-symbols-outlined">error</span>
-                    </div>
-                    <div class="alert-card-content">
-                        <h4>Divergencia de Caixa</h4>
-                        <p>Caixa 02 fechou com falta de R$ 12,50.</p>
-                    </div>
-                </div>
-                <div class="alert-card warning">
-                    <div class="alert-card-icon">
-                        <span class="material-symbols-outlined">warning</span>
-                    </div>
-                    <div class="alert-card-content">
-                        <h4>Estoque Baixo</h4>
-                        <p>Massa de Pastel Tradicional (Critico).</p>
-                    </div>
+            <div id="alerts-container" class="space-y-2">
+                <div class="text-center py-4 text-muted">
+                    <span class="material-symbols-outlined text-3xl mb-2">check_circle</span>
+                    <p>Nenhum alerta no momento</p>
                 </div>
             </div>
         </div>
@@ -167,47 +159,12 @@
         <div class="card">
             <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
                 <h3 class="font-semibold">Monitor de Turnos</h3>
-                <span class="text-success text-sm font-medium">5 ativos</span>
+                <span class="text-success text-sm font-medium" id="active-shifts-count">0 ativos</span>
             </div>
-            <div class="divide-y divide-border-light dark:divide-border-dark">
-                <div class="shift-item">
-                    <div class="shift-user">
-                        <div class="shift-avatar-wrapper">
-                            <img src="https://ui-avatars.com/api/?name=Carlos+Silva&background=random" alt="Carlos" class="shift-avatar">
-                            <div class="shift-status active"></div>
-                        </div>
-                        <div class="shift-info">
-                            <h4>Carlos Silva</h4>
-                            <p class="shift-meta">Caixa • 06:12h</p>
-                        </div>
-                    </div>
-                    <button class="shift-action">Ver</button>
-                </div>
-                <div class="shift-item">
-                    <div class="shift-user">
-                        <div class="shift-avatar-wrapper">
-                            <img src="https://ui-avatars.com/api/?name=Ana+Souza&background=random" alt="Ana" class="shift-avatar">
-                            <div class="shift-status active"></div>
-                        </div>
-                        <div class="shift-info">
-                            <h4>Ana Souza</h4>
-                            <p class="shift-meta">Cozinha • 05:45h</p>
-                        </div>
-                    </div>
-                    <button class="shift-action">Ver</button>
-                </div>
-                <div class="shift-item">
-                    <div class="shift-user">
-                        <div class="shift-avatar-wrapper">
-                            <div class="shift-avatar bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-muted">MJ</div>
-                            <div class="shift-status paused"></div>
-                        </div>
-                        <div class="shift-info">
-                            <h4>Maria Julia</h4>
-                            <p class="shift-meta">Atendimento • 00:15h (Pausa)</p>
-                        </div>
-                    </div>
-                    <button class="shift-action">Ver</button>
+            <div id="shifts-container" class="divide-y divide-border-light dark:divide-border-dark">
+                <div class="p-8 text-center text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2">schedule</span>
+                    <p>Nenhum turno ativo no momento</p>
                 </div>
             </div>
         </div>
@@ -215,21 +172,11 @@
         <!-- Recent Activity -->
         <div class="card p-4">
             <h3 class="font-semibold mb-4">Atividade Recente</h3>
-            <div class="timeline">
+            <div class="timeline" id="activity-timeline">
                 <div class="timeline-item">
                     <div class="timeline-dot"></div>
-                    <p class="timeline-time">Ha 15 min</p>
-                    <p class="timeline-content">Fechamento de caixa parcial realizado por <strong>Carlos S.</strong></p>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot muted"></div>
-                    <p class="timeline-time">Ha 42 min</p>
-                    <p class="timeline-content">Sangria de R$ 150,00 autorizada para compra de insumos.</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot muted"></div>
-                    <p class="timeline-time">14:30</p>
-                    <p class="timeline-content">Novo turno iniciado: <strong>Lucas M.</strong> (Entregador).</p>
+                    <p class="timeline-time">Agora</p>
+                    <p class="timeline-content">Dashboard carregado</p>
                 </div>
             </div>
         </div>
@@ -260,10 +207,10 @@
 
 <!-- Side Menu Drawer -->
 <div id="side-menu-overlay" class="modal-overlay"></div>
-<div id="side-menu" class="fixed inset-y-0 left-0 w-3/4 max-w-xs bg-card-dark p-6 z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl">
+<div id="side-menu" class="fixed inset-y-0 left-0 w-3/4 max-w-xs bg-card-light dark:bg-card-dark p-6 z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl">
     <div class="flex items-center justify-between mb-8">
-        <h2 class="text-xl font-bold text-white">Menu</h2>
-        <button class="text-muted hover:text-white" id="close-menu">
+        <h2 class="text-xl font-bold">Menu</h2>
+        <button class="text-muted hover:text-current" id="close-menu">
             <span class="material-symbols-outlined">close</span>
         </button>
     </div>
@@ -273,65 +220,147 @@
             <span class="material-symbols-outlined">dashboard</span>
             <span class="font-medium">Dashboard</span>
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="products">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-background-light dark:hover:bg-background-dark" data-nav="products">
             <span class="material-symbols-outlined">inventory_2</span>
             <span class="font-medium">Produtos</span>
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="users">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-background-light dark:hover:bg-background-dark" data-nav="users">
             <span class="material-symbols-outlined">group</span>
             <span class="font-medium">Usuarios</span>
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="reports">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-background-light dark:hover:bg-background-dark" data-nav="reports">
             <span class="material-symbols-outlined">bar_chart</span>
             <span class="font-medium">Relatorios</span>
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="financial">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-background-light dark:hover:bg-background-dark" data-nav="financial">
             <span class="material-symbols-outlined">account_balance_wallet</span>
             <span class="font-medium">Financeiro</span>
         </a>
-        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="shift-corrections">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-muted hover:bg-background-light dark:hover:bg-background-dark" data-nav="shift-corrections">
             <span class="material-symbols-outlined">edit_note</span>
             <span class="font-medium">Correcoes</span>
         </a>
     </nav>
 
-    <div class="absolute bottom-6 left-6 right-6 pt-6 border-t border-gray-800">
-        <button class="flex items-center gap-3 px-4 py-2 text-danger hover:text-red-400 w-full" data-logout>
+    <div class="absolute bottom-6 left-6 right-6 pt-6 border-t border-border-light dark:border-border-dark">
+        <button class="flex items-center gap-3 px-4 py-2 text-danger hover:opacity-80 w-full" data-logout>
             <span class="material-symbols-outlined">logout</span>
             <span class="font-medium">Sair</span>
         </button>
     </div>
 </div>
 
-<script>
-    (function() {
-        // Menu toggle
+<!-- Shift Details Modal -->
+<div id="shift-details-modal-overlay" class="modal-overlay"></div>
+<div id="shift-details-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-bold">Detalhes do Turno</h2>
+                <p class="text-sm text-muted" id="shift-detail-user">--</p>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="shift-details-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Shift Info -->
+            <div class="bg-background-light dark:bg-background-dark rounded-xl p-4">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-muted">Inicio</p>
+                        <p class="font-semibold" id="shift-detail-start">--:--</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Duracao</p>
+                        <p class="font-semibold" id="shift-detail-duration">00:00</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Caixa Inicial</p>
+                        <p class="font-semibold" id="shift-detail-initial">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Caixa Atual</p>
+                        <p class="font-semibold text-primary" id="shift-detail-current">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="card p-3 text-center">
+                    <p class="text-2xl font-bold text-success" id="shift-detail-sales">R$ 0</p>
+                    <p class="text-xs text-muted">Vendas</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-2xl font-bold" id="shift-detail-orders">0</p>
+                    <p class="text-xs text-muted">Pedidos</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-2xl font-bold text-warning" id="shift-detail-withdrawals">R$ 0</p>
+                    <p class="text-xs text-muted">Sangrias</p>
+                </div>
+            </div>
+
+            <!-- Last Transactions -->
+            <div>
+                <h3 class="font-semibold mb-3">Ultimas Transacoes</h3>
+                <div id="shift-detail-transactions" class="space-y-2 max-h-48 overflow-y-auto">
+                    <p class="text-center py-4 text-muted">Nenhuma transacao</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+// Admin Dashboard Controller
+const AdminController = {
+    shifts: [],
+    stats: { todaySales: 0, todayOrders: 0, activeShiftsCount: 0, totalDivergence: 0, ticketMedio: 0 },
+    currentUser: null,
+    selectedPeriod: 'today',
+
+    async init() {
+        console.log('Initializing Admin Dashboard...');
+        this.currentUser = window.App?.state?.currentUser;
+
+        // Update admin name
+        const nameEl = document.getElementById('admin-name');
+        if (nameEl && this.currentUser) {
+            nameEl.textContent = this.currentUser.name || 'Administrador';
+        }
+
+        // Setup event listeners
+        this.setupMenu();
+        this.setupPeriodSelector();
+        this.setupModals();
+
+        // Load data
+        await this.loadDashboardData();
+    },
+
+    setupMenu() {
         const menuToggle = document.getElementById('menu-toggle');
         const sideMenu = document.getElementById('side-menu');
         const sideMenuOverlay = document.getElementById('side-menu-overlay');
         const closeMenu = document.getElementById('close-menu');
 
-        function openMenu() {
+        const openMenu = () => {
             sideMenu.style.transform = 'translateX(0)';
             sideMenuOverlay.classList.add('active');
-        }
+        };
 
-        function closeMenuFn() {
+        const closeMenuFn = () => {
             sideMenu.style.transform = 'translateX(-100%)';
             sideMenuOverlay.classList.remove('active');
-        }
+        };
 
         menuToggle?.addEventListener('click', openMenu);
         closeMenu?.addEventListener('click', closeMenuFn);
         sideMenuOverlay?.addEventListener('click', closeMenuFn);
-
-        // Period selector
-        document.querySelectorAll('.period-option').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.period-option').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
 
         // Side menu navigation
         document.querySelectorAll('#side-menu [data-nav]').forEach(link => {
@@ -341,5 +370,273 @@
                 App.navigateTo(link.dataset.nav);
             });
         });
-    })();
+    },
+
+    setupPeriodSelector() {
+        document.querySelectorAll('.period-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.selectedPeriod = btn.dataset.period;
+                // Could reload data for different periods here
+            });
+        });
+    },
+
+    setupModals() {
+        document.querySelectorAll('[data-modal-close]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.modalClose;
+                this.closeModal(modalId);
+            });
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', () => {
+                const modalId = overlay.id.replace('-overlay', '');
+                this.closeModal(modalId);
+            });
+        });
+    },
+
+    openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal) {
+            modal.style.display = 'block';
+            overlay?.classList.add('active');
+            setTimeout(() => {
+                modal.style.transform = 'translateY(0)';
+            }, 10);
+        }
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal) {
+            modal.style.transform = 'translateY(100%)';
+            overlay?.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    },
+
+    async loadDashboardData() {
+        try {
+            const { subscribeToDashboardStats, subscribeToAllActiveShifts } = await import('./js/firebase-config.js');
+
+            // Subscribe to stats
+            const statsUnsub = subscribeToDashboardStats((stats) => {
+                this.stats = stats;
+                this.updateStatsDisplay();
+            });
+
+            // Subscribe to active shifts
+            const shiftsUnsub = subscribeToAllActiveShifts((shifts) => {
+                this.shifts = shifts;
+                this.updateShiftsDisplay();
+                this.updateAlerts();
+            });
+
+            if (window.App?.state?.unsubscribers) {
+                window.App.state.unsubscribers.push(statsUnsub);
+                window.App.state.unsubscribers.push(shiftsUnsub);
+            }
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    },
+
+    updateStatsDisplay() {
+        document.getElementById('stat-total-sales').textContent = this.formatCurrency(this.stats.todaySales);
+        document.getElementById('stat-ticket-medio').textContent = this.formatCurrency(this.stats.ticketMedio);
+        document.getElementById('stat-active-shifts').textContent = this.stats.activeShiftsCount;
+
+        // Divergence with color
+        const divergenceEl = document.getElementById('stat-divergence');
+        const divergenceCard = document.getElementById('divergence-card');
+
+        if (divergenceEl) {
+            const div = this.stats.totalDivergence || 0;
+            divergenceEl.textContent = (div >= 0 ? '' : '-') + this.formatCurrency(Math.abs(div));
+
+            if (div < 0) {
+                divergenceCard?.classList.add('border-danger/20', 'bg-danger/5');
+                divergenceEl.classList.add('text-danger');
+            } else {
+                divergenceCard?.classList.remove('border-danger/20', 'bg-danger/5');
+                divergenceEl.classList.remove('text-danger');
+            }
+        }
+    },
+
+    updateShiftsDisplay() {
+        const container = document.getElementById('shifts-container');
+        const countEl = document.getElementById('active-shifts-count');
+
+        if (countEl) {
+            countEl.textContent = `${this.shifts.length} ${this.shifts.length === 1 ? 'ativo' : 'ativos'}`;
+        }
+
+        if (!container) return;
+
+        if (this.shifts.length === 0) {
+            container.innerHTML = `
+                <div class="p-8 text-center text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2">schedule</span>
+                    <p>Nenhum turno ativo no momento</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.shifts.map(shift => {
+            const duration = this.formatDuration(Date.now() - shift.startTime);
+            const sales = this.formatCurrency(shift.totalSales || 0);
+
+            return `
+                <div class="shift-item">
+                    <div class="shift-user">
+                        <div class="shift-avatar-wrapper">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(shift.userName)}&background=random"
+                                 alt="${shift.userName}"
+                                 class="shift-avatar">
+                            <div class="shift-status active"></div>
+                        </div>
+                        <div class="shift-info">
+                            <h4>${shift.userName}</h4>
+                            <p class="shift-meta">${sales} | ${duration}</p>
+                        </div>
+                    </div>
+                    <button class="shift-action" onclick="AdminController.viewShiftDetails('${shift.id}')">Ver</button>
+                </div>
+            `;
+        }).join('');
+    },
+
+    updateAlerts() {
+        const container = document.getElementById('alerts-container');
+        const countEl = document.getElementById('alerts-count');
+        const notifBadge = document.getElementById('notifications-badge');
+
+        const alerts = [];
+
+        // Check for divergences
+        this.shifts.forEach(shift => {
+            if (shift.closingData?.divergence && Math.abs(shift.closingData.divergence) > 1) {
+                alerts.push({
+                    type: 'error',
+                    title: 'Divergencia de Caixa',
+                    message: `${shift.userName} fechou com ${shift.closingData.divergence > 0 ? 'sobra' : 'falta'} de ${this.formatCurrency(Math.abs(shift.closingData.divergence))}`
+                });
+            }
+        });
+
+        // Update count
+        if (countEl) {
+            countEl.textContent = `${alerts.length} ${alerts.length === 1 ? 'Novo' : 'Novos'}`;
+            countEl.classList.toggle('hidden', alerts.length === 0);
+        }
+
+        if (notifBadge) {
+            notifBadge.classList.toggle('hidden', alerts.length === 0);
+        }
+
+        if (!container) return;
+
+        if (alerts.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <span class="material-symbols-outlined text-3xl mb-2">check_circle</span>
+                    <p>Nenhum alerta no momento</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = alerts.map(alert => `
+            <div class="alert-card ${alert.type}">
+                <div class="alert-card-icon">
+                    <span class="material-symbols-outlined">${alert.type === 'error' ? 'error' : 'warning'}</span>
+                </div>
+                <div class="alert-card-content">
+                    <h4>${alert.title}</h4>
+                    <p>${alert.message}</p>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    viewShiftDetails(shiftId) {
+        const shift = this.shifts.find(s => s.id === shiftId);
+        if (!shift) {
+            App.showToast('Turno nao encontrado', 'danger');
+            return;
+        }
+
+        // Populate modal
+        document.getElementById('shift-detail-user').textContent = shift.userName;
+        document.getElementById('shift-detail-start').textContent = new Date(shift.startTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('shift-detail-duration').textContent = this.formatDuration(Date.now() - shift.startTime);
+        document.getElementById('shift-detail-initial').textContent = this.formatCurrency(shift.initialCash);
+        document.getElementById('shift-detail-current').textContent = this.formatCurrency((shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0));
+        document.getElementById('shift-detail-sales').textContent = this.formatCurrency(shift.totalSales || 0);
+        document.getElementById('shift-detail-orders').textContent = shift.salesCount || 0;
+        document.getElementById('shift-detail-withdrawals').textContent = this.formatCurrency(shift.totalWithdrawals || 0);
+
+        // Transactions
+        const transContainer = document.getElementById('shift-detail-transactions');
+        const sales = shift.sales ? Object.values(shift.sales) : [];
+        const withdrawals = shift.withdrawals ? Object.values(shift.withdrawals) : [];
+        const transactions = [
+            ...sales.map(s => ({ ...s, type: 'sale' })),
+            ...withdrawals.map(w => ({ ...w, type: 'withdrawal' }))
+        ].sort((a, b) => b.timestamp - a.timestamp);
+
+        if (transactions.length === 0) {
+            transContainer.innerHTML = '<p class="text-center py-4 text-muted">Nenhuma transacao</p>';
+        } else {
+            transContainer.innerHTML = transactions.slice(0, 5).map(t => {
+                const time = new Date(t.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const isSale = t.type === 'sale';
+                return `
+                    <div class="flex items-center justify-between p-2 bg-background-light dark:bg-background-dark rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm ${isSale ? 'text-success' : 'text-warning'}">
+                                ${isSale ? 'add_shopping_cart' : 'money_off'}
+                            </span>
+                            <span class="text-sm">${isSale ? 'Venda' : 'Sangria'} - ${time}</span>
+                        </div>
+                        <span class="font-semibold ${isSale ? 'text-success' : 'text-warning'}">
+                            ${isSale ? '+' : '-'}${this.formatCurrency(t.total || t.amount)}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        this.openModal('shift-details-modal');
+    },
+
+    formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value || 0);
+    },
+
+    formatDuration(ms) {
+        const hours = Math.floor(ms / 3600000);
+        const minutes = Math.floor((ms % 3600000) / 60000);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}h`;
+    }
+};
+
+// Initialize
+window.AdminController = AdminController;
+AdminController.init();
 </script>

@@ -79,7 +79,7 @@
                 <div class="stats-card-value" id="today-sales">R$ 0,00</div>
                 <div class="stats-card-trend up">
                     <span class="material-symbols-outlined">trending_up</span>
-                    <span>+12%</span>
+                    <span id="sales-trend">+0%</span>
                 </div>
             </div>
             <div class="stats-card">
@@ -91,6 +91,25 @@
                 </div>
                 <div class="stats-card-value" id="today-orders">0</div>
                 <span class="text-xs text-muted">hoje</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div id="quick-actions" class="hidden">
+            <h3 class="font-semibold mb-3">Acoes Rapidas</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="card p-4 flex flex-col items-center gap-2 hover:border-primary transition-colors" data-modal-open="products-modal">
+                    <div class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-success text-2xl">add_shopping_cart</span>
+                    </div>
+                    <span class="text-sm font-medium">Nova Venda</span>
+                </button>
+                <button class="card p-4 flex flex-col items-center gap-2 hover:border-primary transition-colors" data-modal-open="withdrawal-modal">
+                    <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-warning text-2xl">money_off</span>
+                    </div>
+                    <span class="text-sm font-medium">Sangria</span>
+                </button>
             </div>
         </div>
 
@@ -118,7 +137,7 @@
                 <h3 class="font-semibold">Atividade Recente</h3>
             </div>
             <div id="recent-activity" class="p-4">
-                <div class="timeline">
+                <div class="timeline" id="activity-timeline">
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
                         <p class="timeline-time">Agora</p>
@@ -144,7 +163,7 @@
                 <span class="material-symbols-outlined">inventory_2</span>
                 <span>Produtos</span>
             </button>
-            <button class="bottom-nav-item" onclick="App.showToast('Em breve!', 'info')">
+            <button class="bottom-nav-item" data-modal-open="settings-modal">
                 <span class="material-symbols-outlined">settings</span>
                 <span>Config</span>
             </button>
@@ -156,10 +175,7 @@
 <div id="open-shift-modal-overlay" class="modal-overlay"></div>
 <div id="open-shift-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
     <div class="p-6">
-        <!-- Handle -->
         <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
-
-        <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="text-xl font-bold">Abrir Novo Turno</h2>
@@ -169,26 +185,6 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-
-        <!-- Expected Values -->
-        <div class="mb-6">
-            <h3 class="text-xs font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">history</span>
-                Valores Esperados (Turno Anterior)
-            </h3>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-background-light dark:bg-background-dark p-4 rounded-xl">
-                    <span class="text-xs text-muted">Caixa Esperado</span>
-                    <p class="text-xl font-bold font-mono">R$ 450,00</p>
-                </div>
-                <div class="bg-background-light dark:bg-background-dark p-4 rounded-xl">
-                    <span class="text-xs text-muted">Moedas Esperadas</span>
-                    <p class="text-xl font-bold font-mono">R$ 52,50</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Input Fields -->
         <form id="open-shift-form" class="space-y-4">
             <div>
                 <label class="text-sm font-medium text-muted block mb-2">Caixa Inicial (R$)</label>
@@ -204,12 +200,8 @@
                     <input type="number" step="0.01" id="initial-coins" class="input pl-10 font-mono" placeholder="0,00">
                 </div>
             </div>
-
-            <!-- Actions -->
             <div class="flex gap-3 pt-4">
-                <button type="button" class="btn btn-secondary flex-1" data-modal-close="open-shift-modal">
-                    Cancelar
-                </button>
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="open-shift-modal">Cancelar</button>
                 <button type="submit" class="btn btn-primary flex-[2]">
                     <span class="material-symbols-outlined">check_circle</span>
                     Abrir Turno
@@ -224,7 +216,6 @@
 <div id="close-shift-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
     <div class="p-6">
         <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
-
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h2 class="text-xl font-bold">Fechar Turno</h2>
@@ -234,7 +225,28 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-
+        <!-- Shift Summary -->
+        <div class="bg-background-light dark:bg-background-dark rounded-xl p-4 mb-4">
+            <h3 class="text-sm font-semibold text-muted mb-3">Resumo do Turno</h3>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <p class="text-muted">Caixa Inicial</p>
+                    <p class="font-semibold" id="summary-initial-cash">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-muted">Total Vendas</p>
+                    <p class="font-semibold text-success" id="summary-total-sales">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-muted">Sangrias</p>
+                    <p class="font-semibold text-warning" id="summary-withdrawals">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-muted">Caixa Esperado</p>
+                    <p class="font-semibold text-primary" id="summary-expected-cash">R$ 0,00</p>
+                </div>
+            </div>
+        </div>
         <form id="close-shift-form" class="space-y-4">
             <div>
                 <label class="text-sm font-medium text-muted block mb-2">Caixa Final (R$)</label>
@@ -243,15 +255,18 @@
                     <input type="number" step="0.01" id="final-cash" class="input pl-10 font-mono" placeholder="0,00" required>
                 </div>
             </div>
+            <div id="divergence-alert" class="hidden bg-danger/10 border border-danger/20 rounded-lg p-3">
+                <div class="flex items-center gap-2 text-danger">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span class="font-medium">Divergencia: <span id="divergence-value">R$ 0,00</span></span>
+                </div>
+            </div>
             <div>
                 <label class="text-sm font-medium text-muted block mb-2">Observacoes</label>
                 <textarea id="shift-notes" class="input resize-none h-24" placeholder="Observacoes sobre o turno..."></textarea>
             </div>
-
             <div class="flex gap-3 pt-4">
-                <button type="button" class="btn btn-secondary flex-1" data-modal-close="close-shift-modal">
-                    Cancelar
-                </button>
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="close-shift-modal">Cancelar</button>
                 <button type="submit" class="btn btn-danger flex-[2]">
                     <span class="material-symbols-outlined">stop</span>
                     Encerrar Turno
@@ -261,99 +276,939 @@
     </div>
 </div>
 
-<script>
-    // Employee Dashboard initialization
-    (function() {
-        // Modal handling
-        document.querySelectorAll('[data-modal-open]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const modalId = btn.dataset.modalOpen;
-                const modal = document.getElementById(modalId);
-                const overlay = document.getElementById(modalId + '-overlay');
+<!-- Cash Register Modal -->
+<div id="cash-register-modal-overlay" class="modal-overlay"></div>
+<div id="cash-register-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-bold">Caixa</h2>
+                <p class="text-sm text-muted">Gerenciamento do caixa atual</p>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="cash-register-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
 
-                if (modal && overlay) {
-                    modal.style.display = 'block';
-                    overlay.classList.add('active');
-                    setTimeout(() => {
-                        modal.style.transform = 'translateY(0)';
-                    }, 10);
-                }
+        <!-- Cash Summary -->
+        <div class="bg-background-light dark:bg-background-dark rounded-xl p-4 mb-6">
+            <div class="text-center mb-4">
+                <p class="text-sm text-muted">Caixa Atual</p>
+                <p class="text-3xl font-bold text-primary" id="current-cash-display">R$ 0,00</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-sm">
+                <div>
+                    <p class="text-muted">Inicial</p>
+                    <p class="font-semibold" id="cash-initial">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-muted">Vendas</p>
+                    <p class="font-semibold text-success" id="cash-sales">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-muted">Sangrias</p>
+                    <p class="font-semibold text-warning" id="cash-withdrawals">R$ 0,00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <button class="btn btn-primary" data-action="new-sale">
+                <span class="material-symbols-outlined">add_shopping_cart</span>
+                Nova Venda
+            </button>
+            <button class="btn btn-secondary" data-action="new-withdrawal">
+                <span class="material-symbols-outlined">money_off</span>
+                Sangria
+            </button>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div>
+            <h3 class="font-semibold mb-3">Ultimas Transacoes</h3>
+            <div id="cash-transactions" class="space-y-2 max-h-64 overflow-y-auto">
+                <div class="text-center py-4 text-muted">
+                    <span class="material-symbols-outlined text-3xl mb-2">receipt_long</span>
+                    <p>Nenhuma transacao ainda</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Modal -->
+<div id="products-modal-overlay" class="modal-overlay"></div>
+<div id="products-modal" class="fixed inset-0 z-50 bg-card-light dark:bg-card-dark transform translate-y-full transition-transform duration-300 overflow-hidden flex flex-col" style="display: none;">
+    <!-- Header -->
+    <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold">Nova Venda</h2>
+            <p class="text-sm text-muted">Selecione os produtos</p>
+        </div>
+        <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="products-modal">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="px-4 py-2 border-b border-border-light dark:border-border-dark overflow-x-auto">
+        <div class="flex gap-2" id="category-tabs">
+            <button class="filter-chip active" data-category="all">Todos</button>
+            <button class="filter-chip" data-category="pasteis">Pasteis</button>
+            <button class="filter-chip" data-category="bebidas">Bebidas</button>
+            <button class="filter-chip" data-category="outros">Outros</button>
+        </div>
+    </div>
+
+    <!-- Products List -->
+    <div class="flex-1 overflow-y-auto p-4">
+        <div id="products-grid" class="grid grid-cols-2 gap-3">
+            <!-- Products will be loaded here -->
+            <div class="col-span-2 text-center py-8 text-muted">
+                <span class="material-symbols-outlined text-4xl mb-2">hourglass_empty</span>
+                <p>Carregando produtos...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div id="cart-summary" class="hidden border-t border-border-light dark:border-border-dark p-4 bg-card-light dark:bg-card-dark">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <p class="text-sm text-muted">Total do Pedido</p>
+                <p class="text-2xl font-bold" id="cart-total">R$ 0,00</p>
+            </div>
+            <span class="badge badge-primary" id="cart-count">0 itens</span>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="mb-4">
+            <p class="text-sm font-medium text-muted mb-2">Forma de Pagamento</p>
+            <div class="grid grid-cols-3 gap-2">
+                <button class="payment-method-btn active" data-payment="cash">
+                    <span class="material-symbols-outlined">payments</span>
+                    <span>Dinheiro</span>
+                </button>
+                <button class="payment-method-btn" data-payment="credit">
+                    <span class="material-symbols-outlined">credit_card</span>
+                    <span>Credito</span>
+                </button>
+                <button class="payment-method-btn" data-payment="debit">
+                    <span class="material-symbols-outlined">contactless</span>
+                    <span>Debito</span>
+                </button>
+            </div>
+        </div>
+
+        <button id="finalize-sale-btn" class="btn btn-success w-full">
+            <span class="material-symbols-outlined">check_circle</span>
+            Finalizar Venda
+        </button>
+    </div>
+</div>
+
+<!-- Withdrawal Modal -->
+<div id="withdrawal-modal-overlay" class="modal-overlay"></div>
+<div id="withdrawal-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-bold">Sangria</h2>
+                <p class="text-sm text-muted">Registrar retirada de caixa</p>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="withdrawal-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="withdrawal-form" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Valor (R$)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted">R$</span>
+                    <input type="number" step="0.01" id="withdrawal-amount" class="input pl-10 font-mono" placeholder="0,00" required>
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Motivo</label>
+                <select id="withdrawal-reason" class="input" required>
+                    <option value="">Selecione o motivo</option>
+                    <option value="compra_insumos">Compra de Insumos</option>
+                    <option value="troco">Troco</option>
+                    <option value="despesa">Despesa Operacional</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Observacao</label>
+                <input type="text" id="withdrawal-note" class="input" placeholder="Detalhe o motivo...">
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="withdrawal-modal">Cancelar</button>
+                <button type="submit" class="btn btn-warning flex-[2]">
+                    <span class="material-symbols-outlined">money_off</span>
+                    Registrar Sangria
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal-overlay" class="modal-overlay"></div>
+<div id="settings-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold">Configuracoes</h2>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="settings-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-background-light dark:bg-background-dark rounded-xl">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-muted">dark_mode</span>
+                    <span class="font-medium">Modo Escuro</span>
+                </div>
+                <button id="theme-toggle-btn" class="w-12 h-6 rounded-full bg-primary/20 relative transition-colors" data-theme-toggle>
+                    <span class="absolute left-1 top-1 w-4 h-4 rounded-full bg-primary transform transition-transform"></span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-background-light dark:bg-background-dark rounded-xl">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-muted">notifications</span>
+                    <span class="font-medium">Notificacoes</span>
+                </div>
+                <span class="badge badge-success">Ativo</span>
+            </div>
+            <button class="w-full p-4 bg-danger/10 text-danger rounded-xl flex items-center justify-center gap-2 font-medium" data-logout>
+                <span class="material-symbols-outlined">logout</span>
+                Sair da Conta
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-method-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    border-radius: 12px;
+    background: var(--bg-light);
+    border: 2px solid var(--border-light);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.dark .payment-method-btn {
+    background: var(--bg-dark);
+    border-color: var(--border-dark);
+}
+.payment-method-btn.active {
+    background: var(--primary);
+    background: rgba(32, 148, 243, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.payment-method-btn .material-symbols-outlined {
+    font-size: 24px;
+}
+.product-card {
+    background: var(--card-light);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.dark .product-card {
+    background: var(--card-dark);
+    border-color: var(--border-dark);
+}
+.product-card:hover {
+    border-color: var(--primary);
+}
+.product-card.selected {
+    border-color: var(--primary);
+    background: rgba(32, 148, 243, 0.1);
+}
+.product-card .quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: auto;
+}
+.product-card .quantity-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+}
+.dark .product-card .quantity-btn {
+    background: var(--bg-dark);
+    border-color: var(--border-dark);
+}
+.product-card .quantity {
+    font-weight: 700;
+    font-size: 18px;
+    min-width: 24px;
+    text-align: center;
+}
+</style>
+
+<script type="module">
+// Employee Dashboard Controller
+const EmployeeController = {
+    cart: [],
+    products: [],
+    activeShift: null,
+    currentUser: null,
+    paymentMethod: 'cash',
+
+    async init() {
+        console.log('Initializing Employee Dashboard...');
+        this.currentUser = window.App?.state?.currentUser;
+
+        // Update employee name
+        const nameEl = document.getElementById('employee-name');
+        if (nameEl && this.currentUser) {
+            nameEl.textContent = this.currentUser.name || 'Funcionario';
+        }
+
+        // Setup all event listeners
+        this.setupModalHandlers();
+        this.setupFormHandlers();
+        this.setupProductsModal();
+        this.setupCashRegister();
+
+        // Load shift data
+        await this.loadShiftData();
+
+        // Load products
+        await this.loadProducts();
+    },
+
+    setupModalHandlers() {
+        // Open modal
+        document.querySelectorAll('[data-modal-open]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modalId = btn.dataset.modalOpen;
+                this.openModal(modalId);
             });
         });
 
+        // Close modal
         document.querySelectorAll('[data-modal-close]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const modalId = btn.dataset.modalClose;
-                const modal = document.getElementById(modalId);
-                const overlay = document.getElementById(modalId + '-overlay');
-
-                if (modal && overlay) {
-                    modal.style.transform = 'translateY(100%)';
-                    overlay.classList.remove('active');
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                    }, 300);
-                }
+                this.closeModal(modalId);
             });
         });
 
-        // Close modal on overlay click
+        // Close on overlay click
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', () => {
                 const modalId = overlay.id.replace('-overlay', '');
-                const modal = document.getElementById(modalId);
-
-                if (modal) {
-                    modal.style.transform = 'translateY(100%)';
-                    overlay.classList.remove('active');
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                    }, 300);
-                }
+                this.closeModal(modalId);
             });
         });
+    },
 
+    openModal(modalId) {
+        // Check if shift is active for certain modals
+        const needsShift = ['products-modal', 'cash-register-modal', 'withdrawal-modal'];
+        if (needsShift.includes(modalId) && !this.activeShift) {
+            App.showToast('Inicie um turno primeiro!', 'warning');
+            return;
+        }
+
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal) {
+            modal.style.display = 'flex';
+            overlay?.classList.add('active');
+            setTimeout(() => {
+                modal.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        // Update cash register data when opening
+        if (modalId === 'cash-register-modal') {
+            this.updateCashRegisterDisplay();
+        }
+
+        // Update close shift summary
+        if (modalId === 'close-shift-modal') {
+            this.updateCloseShiftSummary();
+        }
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal) {
+            modal.style.transform = 'translateY(100%)';
+            overlay?.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    },
+
+    setupFormHandlers() {
         // Open Shift Form
         document.getElementById('open-shift-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const cash = document.getElementById('initial-cash').value;
-            const coins = document.getElementById('initial-coins').value || 0;
-
-            // Here you would save to Firebase
-            console.log('Opening shift with:', { cash, coins });
-            App.showToast('Turno iniciado com sucesso!', 'success');
-
-            // Close modal
-            document.querySelector('[data-modal-close="open-shift-modal"]').click();
-
-            // Update UI
-            document.getElementById('no-shift').classList.add('hidden');
-            document.getElementById('active-shift').classList.remove('hidden');
-            document.getElementById('shift-initial-cash').textContent = `R$ ${parseFloat(cash).toFixed(2)}`;
-            document.getElementById('shift-start-time').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-            // Start timer
-            startShiftTimer();
+            await this.handleOpenShift(e);
         });
 
-        // Shift timer
-        let timerInterval;
-        let shiftStartTime;
+        // Close Shift Form
+        document.getElementById('close-shift-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleCloseShift(e);
+        });
 
-        function startShiftTimer() {
-            shiftStartTime = new Date();
-            timerInterval = setInterval(updateTimer, 1000);
+        // Withdrawal Form
+        document.getElementById('withdrawal-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleWithdrawal(e);
+        });
+
+        // Final cash input for divergence calculation
+        document.getElementById('final-cash')?.addEventListener('input', (e) => {
+            this.calculateDivergence(parseFloat(e.target.value) || 0);
+        });
+    },
+
+    async handleOpenShift(e) {
+        const cash = parseFloat(document.getElementById('initial-cash').value) || 0;
+        const coins = parseFloat(document.getElementById('initial-coins').value) || 0;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+
+        if (cash <= 0) {
+            App.showToast('Informe o caixa inicial', 'warning');
+            return;
         }
 
-        function updateTimer() {
-            const now = new Date();
-            const diff = now - shiftStartTime;
+        App.setButtonLoading?.(submitBtn, true) || (submitBtn.disabled = true);
+
+        try {
+            const { openShift } = await import('./js/firebase-config.js');
+            await openShift(this.currentUser.id, this.currentUser.name, cash, coins);
+
+            App.showToast('Turno iniciado com sucesso!', 'success');
+            this.closeModal('open-shift-modal');
+            e.target.reset();
+        } catch (error) {
+            console.error('Error opening shift:', error);
+            App.showToast('Erro ao iniciar turno', 'danger');
+        } finally {
+            App.setButtonLoading?.(submitBtn, false) || (submitBtn.disabled = false);
+        }
+    },
+
+    async handleCloseShift(e) {
+        const finalCash = parseFloat(document.getElementById('final-cash').value) || 0;
+        const notes = document.getElementById('shift-notes').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+
+        if (!this.activeShift) {
+            App.showToast('Nenhum turno ativo', 'danger');
+            return;
+        }
+
+        App.setButtonLoading?.(submitBtn, true) || (submitBtn.disabled = true);
+
+        try {
+            const { closeShift } = await import('./js/firebase-config.js');
+            await closeShift(this.activeShift.id, this.currentUser.id, { finalCash, notes });
+
+            App.showToast('Turno encerrado com sucesso!', 'success');
+            this.closeModal('close-shift-modal');
+            e.target.reset();
+        } catch (error) {
+            console.error('Error closing shift:', error);
+            App.showToast('Erro ao encerrar turno', 'danger');
+        } finally {
+            App.setButtonLoading?.(submitBtn, false) || (submitBtn.disabled = false);
+        }
+    },
+
+    async handleWithdrawal(e) {
+        const amount = parseFloat(document.getElementById('withdrawal-amount').value) || 0;
+        const reason = document.getElementById('withdrawal-reason').value;
+        const note = document.getElementById('withdrawal-note').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+
+        if (amount <= 0) {
+            App.showToast('Informe um valor valido', 'warning');
+            return;
+        }
+
+        if (!reason) {
+            App.showToast('Selecione o motivo', 'warning');
+            return;
+        }
+
+        App.setButtonLoading?.(submitBtn, true) || (submitBtn.disabled = true);
+
+        try {
+            const { addWithdrawalToShift } = await import('./js/firebase-config.js');
+            await addWithdrawalToShift(this.activeShift.id, amount, `${reason}: ${note}`);
+
+            App.showToast('Sangria registrada!', 'success');
+            this.closeModal('withdrawal-modal');
+            this.addToActivityTimeline('Sangria de ' + this.formatCurrency(amount));
+            e.target.reset();
+        } catch (error) {
+            console.error('Error adding withdrawal:', error);
+            App.showToast('Erro ao registrar sangria', 'danger');
+        } finally {
+            App.setButtonLoading?.(submitBtn, false) || (submitBtn.disabled = false);
+        }
+    },
+
+    async loadShiftData() {
+        if (!this.currentUser) return;
+
+        try {
+            const { getUserActiveShift, subscribeToUserShift } = await import('./js/firebase-config.js');
+
+            // Get active shift
+            const activeShift = await getUserActiveShift(this.currentUser.id);
+
+            if (activeShift) {
+                this.activeShift = activeShift;
+                this.showActiveShiftUI();
+            } else {
+                this.showNoShiftUI();
+            }
+
+            // Subscribe to real-time updates
+            const unsub = subscribeToUserShift(this.currentUser.id, (shift) => {
+                if (shift) {
+                    this.activeShift = shift;
+                    this.showActiveShiftUI();
+                    this.updateStats();
+                } else {
+                    this.activeShift = null;
+                    this.showNoShiftUI();
+                }
+            });
+
+            if (window.App?.state?.unsubscribers) {
+                window.App.state.unsubscribers.push(unsub);
+            }
+        } catch (error) {
+            console.error('Error loading shift data:', error);
+        }
+    },
+
+    showActiveShiftUI() {
+        document.getElementById('no-shift')?.classList.add('hidden');
+        document.getElementById('active-shift')?.classList.remove('hidden');
+        document.getElementById('quick-actions')?.classList.remove('hidden');
+
+        if (this.activeShift) {
+            const startTime = new Date(this.activeShift.startTime);
+            document.getElementById('shift-start-time').textContent = startTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('shift-initial-cash').textContent = this.formatCurrency(this.activeShift.initialCash);
+
+            this.startTimer();
+            this.updateStats();
+        }
+    },
+
+    showNoShiftUI() {
+        document.getElementById('no-shift')?.classList.remove('hidden');
+        document.getElementById('active-shift')?.classList.add('hidden');
+        document.getElementById('quick-actions')?.classList.add('hidden');
+
+        this.stopTimer();
+
+        document.getElementById('today-sales').textContent = 'R$ 0,00';
+        document.getElementById('today-orders').textContent = '0';
+    },
+
+    timerInterval: null,
+
+    startTimer() {
+        this.stopTimer();
+
+        const updateTimer = () => {
+            if (!this.activeShift) return;
+
+            const now = Date.now();
+            const diff = now - this.activeShift.startTime;
             const hours = Math.floor(diff / 3600000);
             const minutes = Math.floor((diff % 3600000) / 60000);
             const seconds = Math.floor((diff % 60000) / 1000);
 
-            document.getElementById('shift-timer').textContent =
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const timerEl = document.getElementById('shift-timer');
+            if (timerEl) {
+                timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        };
+
+        updateTimer();
+        this.timerInterval = setInterval(updateTimer, 1000);
+    },
+
+    stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
         }
-    })();
+    },
+
+    updateStats() {
+        if (!this.activeShift) return;
+
+        document.getElementById('today-sales').textContent = this.formatCurrency(this.activeShift.totalSales || 0);
+        document.getElementById('today-orders').textContent = this.activeShift.salesCount || 0;
+    },
+
+    updateCloseShiftSummary() {
+        if (!this.activeShift) return;
+
+        const initialCash = this.activeShift.initialCash || 0;
+        const totalSales = this.activeShift.totalSales || 0;
+        const withdrawals = this.activeShift.totalWithdrawals || 0;
+        const expectedCash = initialCash + totalSales - withdrawals;
+
+        document.getElementById('summary-initial-cash').textContent = this.formatCurrency(initialCash);
+        document.getElementById('summary-total-sales').textContent = this.formatCurrency(totalSales);
+        document.getElementById('summary-withdrawals').textContent = this.formatCurrency(withdrawals);
+        document.getElementById('summary-expected-cash').textContent = this.formatCurrency(expectedCash);
+    },
+
+    calculateDivergence(finalCash) {
+        if (!this.activeShift) return;
+
+        const expectedCash = (this.activeShift.initialCash || 0) + (this.activeShift.totalSales || 0) - (this.activeShift.totalWithdrawals || 0);
+        const divergence = finalCash - expectedCash;
+
+        const alertEl = document.getElementById('divergence-alert');
+        const valueEl = document.getElementById('divergence-value');
+
+        if (Math.abs(divergence) > 0.01) {
+            alertEl?.classList.remove('hidden');
+            if (valueEl) {
+                valueEl.textContent = (divergence > 0 ? '+' : '') + this.formatCurrency(divergence);
+            }
+        } else {
+            alertEl?.classList.add('hidden');
+        }
+    },
+
+    // Products Modal
+    setupProductsModal() {
+        // Category tabs
+        document.querySelectorAll('#category-tabs .filter-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#category-tabs .filter-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.filterProducts(btn.dataset.category);
+            });
+        });
+
+        // Payment method buttons
+        document.querySelectorAll('.payment-method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.paymentMethod = btn.dataset.payment;
+            });
+        });
+
+        // Finalize sale button
+        document.getElementById('finalize-sale-btn')?.addEventListener('click', () => {
+            this.finalizeSale();
+        });
+    },
+
+    async loadProducts() {
+        try {
+            const { subscribeToProducts } = await import('./js/firebase-config.js');
+
+            const unsub = subscribeToProducts((products) => {
+                this.products = products;
+                this.renderProducts();
+            });
+
+            if (window.App?.state?.unsubscribers) {
+                window.App.state.unsubscribers.push(unsub);
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+        }
+    },
+
+    renderProducts(filter = 'all') {
+        const grid = document.getElementById('products-grid');
+        if (!grid) return;
+
+        let filtered = this.products;
+        if (filter !== 'all') {
+            filtered = this.products.filter(p => p.category === filter);
+        }
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-2 text-center py-8 text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2">inventory_2</span>
+                    <p>Nenhum produto encontrado</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = filtered.map(product => {
+            const cartItem = this.cart.find(c => c.id === product.id);
+            const quantity = cartItem ? cartItem.quantity : 0;
+
+            return `
+                <div class="product-card ${quantity > 0 ? 'selected' : ''}" data-product-id="${product.id}">
+                    <div class="text-center">
+                        <span class="material-symbols-outlined text-3xl text-primary mb-2">
+                            ${product.category === 'bebidas' ? 'local_drink' : 'lunch_dining'}
+                        </span>
+                        <h4 class="font-semibold text-sm">${product.name}</h4>
+                        <p class="text-success font-bold">${this.formatCurrency(product.price)}</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="EmployeeController.updateCart('${product.id}', -1)">
+                            <span class="material-symbols-outlined">remove</span>
+                        </button>
+                        <span class="quantity">${quantity}</span>
+                        <button class="quantity-btn" onclick="EmployeeController.updateCart('${product.id}', 1)">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    filterProducts(category) {
+        this.renderProducts(category);
+    },
+
+    updateCart(productId, delta) {
+        const product = this.products.find(p => p.id === productId);
+        if (!product) return;
+
+        let cartItem = this.cart.find(c => c.id === productId);
+
+        if (cartItem) {
+            cartItem.quantity += delta;
+            if (cartItem.quantity <= 0) {
+                this.cart = this.cart.filter(c => c.id !== productId);
+            }
+        } else if (delta > 0) {
+            this.cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1
+            });
+        }
+
+        this.renderProducts(document.querySelector('#category-tabs .filter-chip.active')?.dataset.category || 'all');
+        this.updateCartSummary();
+    },
+
+    updateCartSummary() {
+        const summary = document.getElementById('cart-summary');
+        const totalEl = document.getElementById('cart-total');
+        const countEl = document.getElementById('cart-count');
+
+        if (this.cart.length === 0) {
+            summary?.classList.add('hidden');
+            return;
+        }
+
+        summary?.classList.remove('hidden');
+
+        const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const count = this.cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        if (totalEl) totalEl.textContent = this.formatCurrency(total);
+        if (countEl) countEl.textContent = `${count} ${count === 1 ? 'item' : 'itens'}`;
+    },
+
+    async finalizeSale() {
+        if (this.cart.length === 0) {
+            App.showToast('Adicione produtos ao carrinho', 'warning');
+            return;
+        }
+
+        if (!this.activeShift) {
+            App.showToast('Nenhum turno ativo', 'danger');
+            return;
+        }
+
+        const btn = document.getElementById('finalize-sale-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>';
+
+        try {
+            const { addSaleToShift } = await import('./js/firebase-config.js');
+
+            const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            await addSaleToShift(this.activeShift.id, {
+                items: this.cart.map(item => ({
+                    productId: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                })),
+                total: total,
+                paymentMethod: this.paymentMethod
+            });
+
+            App.showToast('Venda registrada com sucesso!', 'success');
+
+            // Add to activity
+            this.addToActivityTimeline('Venda de ' + this.formatCurrency(total) + ' (' + this.paymentMethod + ')');
+
+            // Clear cart
+            this.cart = [];
+            this.updateCartSummary();
+            this.renderProducts();
+
+            // Close modal
+            this.closeModal('products-modal');
+        } catch (error) {
+            console.error('Error finalizing sale:', error);
+            App.showToast('Erro ao registrar venda', 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Finalizar Venda';
+        }
+    },
+
+    // Cash Register
+    setupCashRegister() {
+        document.querySelector('[data-action="new-sale"]')?.addEventListener('click', () => {
+            this.closeModal('cash-register-modal');
+            setTimeout(() => this.openModal('products-modal'), 300);
+        });
+
+        document.querySelector('[data-action="new-withdrawal"]')?.addEventListener('click', () => {
+            this.closeModal('cash-register-modal');
+            setTimeout(() => this.openModal('withdrawal-modal'), 300);
+        });
+    },
+
+    updateCashRegisterDisplay() {
+        if (!this.activeShift) return;
+
+        const initialCash = this.activeShift.initialCash || 0;
+        const totalSales = this.activeShift.totalSales || 0;
+        const withdrawals = this.activeShift.totalWithdrawals || 0;
+        const currentCash = initialCash + totalSales - withdrawals;
+
+        document.getElementById('current-cash-display').textContent = this.formatCurrency(currentCash);
+        document.getElementById('cash-initial').textContent = this.formatCurrency(initialCash);
+        document.getElementById('cash-sales').textContent = this.formatCurrency(totalSales);
+        document.getElementById('cash-withdrawals').textContent = this.formatCurrency(withdrawals);
+
+        // Update transactions list
+        this.renderTransactions();
+    },
+
+    renderTransactions() {
+        const container = document.getElementById('cash-transactions');
+        if (!container || !this.activeShift) return;
+
+        const sales = this.activeShift.sales ? Object.values(this.activeShift.sales) : [];
+        const withdrawals = this.activeShift.withdrawals ? Object.values(this.activeShift.withdrawals) : [];
+
+        const transactions = [
+            ...sales.map(s => ({ ...s, type: 'sale' })),
+            ...withdrawals.map(w => ({ ...w, type: 'withdrawal' }))
+        ].sort((a, b) => b.timestamp - a.timestamp);
+
+        if (transactions.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <span class="material-symbols-outlined text-3xl mb-2">receipt_long</span>
+                    <p>Nenhuma transacao ainda</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = transactions.slice(0, 10).map(t => {
+            const time = new Date(t.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const isSale = t.type === 'sale';
+
+            return `
+                <div class="flex items-center justify-between p-3 bg-background-light dark:bg-background-dark rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full ${isSale ? 'bg-success/10' : 'bg-warning/10'} flex items-center justify-center">
+                            <span class="material-symbols-outlined ${isSale ? 'text-success' : 'text-warning'}">
+                                ${isSale ? 'add_shopping_cart' : 'money_off'}
+                            </span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-sm">${isSale ? 'Venda' : 'Sangria'}</p>
+                            <p class="text-xs text-muted">${time}</p>
+                        </div>
+                    </div>
+                    <span class="${isSale ? 'text-success' : 'text-warning'} font-semibold">
+                        ${isSale ? '+' : '-'}${this.formatCurrency(t.total || t.amount)}
+                    </span>
+                </div>
+            `;
+        }).join('');
+    },
+
+    addToActivityTimeline(text) {
+        const timeline = document.getElementById('activity-timeline');
+        if (!timeline) return;
+
+        const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        item.innerHTML = `
+            <div class="timeline-dot"></div>
+            <p class="timeline-time">${time}</p>
+            <p class="timeline-content">${text}</p>
+        `;
+
+        timeline.insertBefore(item, timeline.firstChild);
+    },
+
+    formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value || 0);
+    }
+};
+
+// Initialize
+window.EmployeeController = EmployeeController;
+EmployeeController.init();
 </script>

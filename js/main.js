@@ -1415,6 +1415,7 @@ window.App = {
     formatTime,
     formatDateTime,
     toggleTheme,
+    setButtonLoading,
     deleteProduct: deleteProductHandler,
     deleteUser: deleteUserHandler,
     viewShiftDetails: (shiftId) => {

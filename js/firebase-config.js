@@ -461,13 +461,20 @@ export async function addSaleToShift(shiftId, saleData) {
 
         await set(saleRef, sale);
 
-        // Update totals
-        const amount = parseFloat(saleData.total) || 0;
-        await update(ref(rtdb, `shifts/${shiftId}`), {
-            totalSales: increment(amount),
-            salesCount: increment(1),
-            currentCash: saleData.paymentMethod === 'cash' ? increment(amount) : increment(0)
-        });
+        // Get current shift data and update totals
+        const shiftSnapshot = await get(ref(rtdb, `shifts/${shiftId}`));
+        if (shiftSnapshot.exists()) {
+            const currentData = shiftSnapshot.val();
+            const amount = parseFloat(saleData.total) || 0;
+
+            await update(ref(rtdb, `shifts/${shiftId}`), {
+                totalSales: (currentData.totalSales || 0) + amount,
+                salesCount: (currentData.salesCount || 0) + 1,
+                currentCash: saleData.paymentMethod === 'cash'
+                    ? (currentData.currentCash || 0) + amount
+                    : (currentData.currentCash || 0)
+            });
+        }
 
         return { success: true, saleId: saleRef.key };
     } catch (error) {
@@ -491,11 +498,17 @@ export async function addWithdrawalToShift(shiftId, amount, reason) {
 
         await set(withdrawalRef, withdrawal);
 
-        // Update totals
-        await update(ref(rtdb, `shifts/${shiftId}`), {
-            totalWithdrawals: increment(parseFloat(amount) || 0),
-            currentCash: increment(-(parseFloat(amount) || 0))
-        });
+        // Get current shift data and update totals
+        const shiftSnapshot = await get(ref(rtdb, `shifts/${shiftId}`));
+        if (shiftSnapshot.exists()) {
+            const currentData = shiftSnapshot.val();
+            const withdrawalAmount = parseFloat(amount) || 0;
+
+            await update(ref(rtdb, `shifts/${shiftId}`), {
+                totalWithdrawals: (currentData.totalWithdrawals || 0) + withdrawalAmount,
+                currentCash: (currentData.currentCash || 0) - withdrawalAmount
+            });
+        }
 
         return { success: true, withdrawalId: withdrawalRef.key };
     } catch (error) {

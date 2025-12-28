@@ -8,7 +8,7 @@
             </button>
             <div>
                 <h1 class="app-header-title">Gestao de Usuarios</h1>
-                <p class="text-xs text-muted">32 membros ativos</p>
+                <p class="text-xs text-muted"><span id="users-count">0</span> membros</p>
             </div>
         </div>
         <button class="btn btn-primary w-10 h-10 !p-0 rounded-full" data-modal-open="new-user-modal">
@@ -28,119 +28,16 @@
 
         <!-- Role Filters -->
         <div class="filter-chips -mx-4 px-4">
-            <button class="filter-chip active">Todos</button>
-            <button class="filter-chip">Admin</button>
-            <button class="filter-chip">Funcionario</button>
+            <button class="filter-chip active" data-role="all">Todos</button>
+            <button class="filter-chip" data-role="admin">Admin</button>
+            <button class="filter-chip" data-role="staff">Funcionario</button>
         </div>
 
         <!-- Users List -->
         <div class="space-y-3" id="users-list">
-            <div class="user-card">
-                <div class="user-card-header">
-                    <div class="user-card-info">
-                        <img src="https://ui-avatars.com/api/?name=Carlos+Silva&background=random" alt="Carlos" class="user-card-avatar">
-                        <div>
-                            <h3 class="user-card-name">Carlos Silva</h3>
-                            <p class="user-card-email">carlos@restaurante.com</p>
-                        </div>
-                    </div>
-                    <span class="user-card-role admin">Admin</span>
-                </div>
-                <div class="user-card-transport">
-                    <span class="material-symbols-outlined">directions_car</span>
-                    <span class="font-medium">Carro Proprio</span>
-                </div>
-                <div class="user-card-actions">
-                    <button class="btn btn-secondary">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        Editar
-                    </button>
-                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        Excluir
-                    </button>
-                </div>
-            </div>
-
-            <div class="user-card">
-                <div class="user-card-header">
-                    <div class="user-card-info">
-                        <img src="https://ui-avatars.com/api/?name=Ana+Souza&background=random" alt="Ana" class="user-card-avatar">
-                        <div>
-                            <h3 class="user-card-name">Ana Souza</h3>
-                            <p class="user-card-email">ana@restaurante.com</p>
-                        </div>
-                    </div>
-                    <span class="user-card-role staff">Staff</span>
-                </div>
-                <div class="user-card-transport">
-                    <span class="material-symbols-outlined">directions_bus</span>
-                    <span class="font-medium">Linha 304 - Centro</span>
-                </div>
-                <div class="user-card-actions">
-                    <button class="btn btn-secondary">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        Editar
-                    </button>
-                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        Excluir
-                    </button>
-                </div>
-            </div>
-
-            <div class="user-card">
-                <div class="user-card-header">
-                    <div class="user-card-info">
-                        <img src="https://ui-avatars.com/api/?name=Roberto+Lima&background=random" alt="Roberto" class="user-card-avatar">
-                        <div>
-                            <h3 class="user-card-name">Roberto Lima</h3>
-                            <p class="user-card-email">roberto@restaurante.com</p>
-                        </div>
-                    </div>
-                    <span class="user-card-role staff">Staff</span>
-                </div>
-                <div class="user-card-transport">
-                    <span class="material-symbols-outlined">directions_walk</span>
-                    <span class="font-medium">Reside proximo (A pe)</span>
-                </div>
-                <div class="user-card-actions">
-                    <button class="btn btn-secondary">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        Editar
-                    </button>
-                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        Excluir
-                    </button>
-                </div>
-            </div>
-
-            <div class="user-card">
-                <div class="user-card-header">
-                    <div class="user-card-info">
-                        <img src="https://ui-avatars.com/api/?name=Mariana+Costa&background=random" alt="Mariana" class="user-card-avatar">
-                        <div>
-                            <h3 class="user-card-name">Mariana Costa</h3>
-                            <p class="user-card-email">mariana@restaurante.com</p>
-                        </div>
-                    </div>
-                    <span class="user-card-role staff">Staff</span>
-                </div>
-                <div class="user-card-transport">
-                    <span class="material-symbols-outlined">two_wheeler</span>
-                    <span class="font-medium">Moto Propria</span>
-                </div>
-                <div class="user-card-actions">
-                    <button class="btn btn-secondary">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                        Editar
-                    </button>
-                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                        Excluir
-                    </button>
-                </div>
+            <div class="p-8 text-center text-muted">
+                <span class="material-symbols-outlined text-4xl mb-2">hourglass_empty</span>
+                <p>Carregando usuarios...</p>
             </div>
         </div>
     </main>
@@ -175,13 +72,15 @@
         <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
 
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold">Novo Usuario</h2>
+            <h2 class="text-xl font-bold" id="user-modal-title">Novo Usuario</h2>
             <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="new-user-modal">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
 
         <form id="new-user-form" class="space-y-4">
+            <input type="hidden" id="edit-user-id">
+
             <div>
                 <label class="text-sm font-medium text-muted block mb-2">Nome Completo</label>
                 <input type="text" id="user-name" class="input" placeholder="Nome do funcionario" required>
@@ -192,28 +91,29 @@
                 <input type="email" id="user-email" class="input" placeholder="email@exemplo.com" required>
             </div>
 
-            <div>
-                <label class="text-sm font-medium text-muted block mb-2">Funcao</label>
-                <select id="user-role" class="input" required>
-                    <option value="staff">Funcionario</option>
-                    <option value="admin">Administrador</option>
-                </select>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm font-medium text-muted block mb-2">Funcao</label>
+                    <select id="user-role" class="input" required>
+                        <option value="staff">Funcionario</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-muted block mb-2">Transporte</label>
+                    <select id="user-transport" class="input">
+                        <option value="">Selecione...</option>
+                        <option value="car">Carro</option>
+                        <option value="motorcycle">Moto</option>
+                        <option value="bus">Onibus</option>
+                        <option value="walk">A pe</option>
+                    </select>
+                </div>
             </div>
 
-            <div>
-                <label class="text-sm font-medium text-muted block mb-2">Transporte</label>
-                <select id="user-transport" class="input">
-                    <option value="">Selecione...</option>
-                    <option value="car">Carro Proprio</option>
-                    <option value="motorcycle">Moto Propria</option>
-                    <option value="bus">Onibus</option>
-                    <option value="walk">A pe</option>
-                </select>
-            </div>
-
-            <div>
+            <div id="password-field">
                 <label class="text-sm font-medium text-muted block mb-2">Senha Inicial</label>
-                <input type="password" id="user-password" class="input" placeholder="Minimo 6 caracteres" required minlength="6">
+                <input type="password" id="user-password" class="input" placeholder="Minimo 6 caracteres" minlength="6">
             </div>
 
             <div class="flex gap-3 pt-4">
@@ -221,30 +121,70 @@
                     Cancelar
                 </button>
                 <button type="submit" class="btn btn-primary flex-1">
-                    Criar Usuario
+                    <span class="material-symbols-outlined">save</span>
+                    Salvar
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
-    (function() {
-        // Filter chips
+<!-- Delete Confirmation Modal -->
+<div id="delete-user-modal-overlay" class="modal-overlay"></div>
+<div id="delete-user-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-danger text-3xl">person_remove</span>
+            </div>
+            <h2 class="text-xl font-bold">Excluir Usuario?</h2>
+            <p class="text-sm text-muted mt-2">Esta acao nao pode ser desfeita.</p>
+            <p class="font-semibold mt-2" id="delete-user-name"></p>
+        </div>
+
+        <input type="hidden" id="delete-user-id">
+
+        <div class="flex gap-3">
+            <button class="btn btn-secondary flex-1" data-modal-close="delete-user-modal">
+                Cancelar
+            </button>
+            <button class="btn btn-danger flex-1" id="confirm-delete-user-btn">
+                <span class="material-symbols-outlined">delete</span>
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+const UsersController = {
+    users: [],
+    filteredUsers: [],
+    currentFilter: 'all',
+    editingUserId: null,
+
+    async init() {
+        console.log('Initializing Users Management...');
+
+        this.setupEventListeners();
+        await this.loadUsers();
+    },
+
+    setupEventListeners() {
+        // Search input
+        document.getElementById('user-search')?.addEventListener('input', (e) => {
+            this.filterUsers(this.currentFilter, e.target.value);
+        });
+
+        // Role filters
         document.querySelectorAll('.filter-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-            });
-        });
-
-        // Search functionality
-        document.getElementById('user-search')?.addEventListener('input', (e) => {
-            const search = e.target.value.toLowerCase();
-            document.querySelectorAll('.user-card').forEach(card => {
-                const name = card.querySelector('.user-card-name').textContent.toLowerCase();
-                const email = card.querySelector('.user-card-email').textContent.toLowerCase();
-                card.style.display = name.includes(search) || email.includes(search) ? 'block' : 'none';
+                this.currentFilter = chip.dataset.role;
+                this.filterUsers(this.currentFilter);
             });
         });
 
@@ -252,40 +192,276 @@
         document.querySelectorAll('[data-modal-open]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const modalId = btn.dataset.modalOpen;
-                const modal = document.getElementById(modalId);
-                const overlay = document.getElementById(modalId + '-overlay');
+                this.openModal(modalId);
 
-                if (modal && overlay) {
-                    modal.style.display = 'block';
-                    overlay.classList.add('active');
-                    setTimeout(() => {
-                        modal.style.transform = 'translateY(0)';
-                    }, 10);
+                if (modalId === 'new-user-modal') {
+                    this.resetForm();
                 }
             });
         });
 
         document.querySelectorAll('[data-modal-close]').forEach(btn => {
             btn.addEventListener('click', () => {
-                const modalId = btn.dataset.modalClose;
-                const modal = document.getElementById(modalId);
-                const overlay = document.getElementById(modalId + '-overlay');
+                this.closeModal(btn.dataset.modalClose);
+            });
+        });
 
-                if (modal && overlay) {
-                    modal.style.transform = 'translateY(100%)';
-                    overlay.classList.remove('active');
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                    }, 300);
-                }
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', () => {
+                const modalId = overlay.id.replace('-overlay', '');
+                this.closeModal(modalId);
             });
         });
 
         // Form submission
-        document.getElementById('new-user-form')?.addEventListener('submit', (e) => {
+        document.getElementById('new-user-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            App.showToast('Usuario criado com sucesso!', 'success');
-            document.querySelector('[data-modal-close="new-user-modal"]').click();
+            await this.saveUser();
         });
-    })();
+
+        // Delete confirmation
+        document.getElementById('confirm-delete-user-btn')?.addEventListener('click', async () => {
+            await this.deleteUser();
+        });
+    },
+
+    openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal && overlay) {
+            modal.style.display = 'block';
+            overlay.classList.add('active');
+            setTimeout(() => {
+                modal.style.transform = 'translateY(0)';
+            }, 10);
+        }
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal && overlay) {
+            modal.style.transform = 'translateY(100%)';
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    },
+
+    resetForm() {
+        this.editingUserId = null;
+        document.getElementById('user-modal-title').textContent = 'Novo Usuario';
+        document.getElementById('edit-user-id').value = '';
+        document.getElementById('user-name').value = '';
+        document.getElementById('user-email').value = '';
+        document.getElementById('user-role').value = 'staff';
+        document.getElementById('user-transport').value = '';
+        document.getElementById('user-password').value = '';
+        document.getElementById('password-field').style.display = 'block';
+        document.getElementById('user-email').disabled = false;
+    },
+
+    async loadUsers() {
+        try {
+            const { subscribeToUsers } = await import('./js/firebase-config.js');
+
+            const unsub = subscribeToUsers((users) => {
+                this.users = users;
+                this.filterUsers(this.currentFilter);
+            });
+
+            if (window.App?.state?.unsubscribers) {
+                window.App.state.unsubscribers.push(unsub);
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+            App.showToast('Erro ao carregar usuarios', 'danger');
+        }
+    },
+
+    filterUsers(role, search = '') {
+        let filtered = this.users;
+
+        if (role !== 'all') {
+            filtered = filtered.filter(u => u.role === role);
+        }
+
+        if (search) {
+            const searchLower = search.toLowerCase();
+            filtered = filtered.filter(u =>
+                u.name?.toLowerCase().includes(searchLower) ||
+                u.email?.toLowerCase().includes(searchLower)
+            );
+        }
+
+        this.filteredUsers = filtered;
+        this.renderUsers();
+    },
+
+    renderUsers() {
+        const container = document.getElementById('users-list');
+        const countEl = document.getElementById('users-count');
+
+        if (countEl) {
+            countEl.textContent = this.filteredUsers.length;
+        }
+
+        if (!container) return;
+
+        if (this.filteredUsers.length === 0) {
+            container.innerHTML = `
+                <div class="p-8 text-center text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2">group</span>
+                    <p>Nenhum usuario encontrado</p>
+                </div>
+            `;
+            return;
+        }
+
+        const transportIcons = {
+            car: 'directions_car',
+            motorcycle: 'two_wheeler',
+            bus: 'directions_bus',
+            walk: 'directions_walk'
+        };
+
+        const transportLabels = {
+            car: 'Carro Proprio',
+            motorcycle: 'Moto Propria',
+            bus: 'Onibus',
+            walk: 'A pe'
+        };
+
+        container.innerHTML = this.filteredUsers.map(user => `
+            <div class="user-card">
+                <div class="user-card-header">
+                    <div class="user-card-info">
+                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random" alt="${user.name}" class="user-card-avatar">
+                        <div>
+                            <h3 class="user-card-name">${user.name}</h3>
+                            <p class="user-card-email">${user.email}</p>
+                        </div>
+                    </div>
+                    <span class="user-card-role ${user.role}">${user.role === 'admin' ? 'Admin' : 'Staff'}</span>
+                </div>
+                ${user.transport ? `
+                <div class="user-card-transport">
+                    <span class="material-symbols-outlined">${transportIcons[user.transport] || 'directions_walk'}</span>
+                    <span class="font-medium">${transportLabels[user.transport] || user.transport}</span>
+                </div>
+                ` : ''}
+                <div class="user-card-actions">
+                    <button class="btn btn-secondary" onclick="UsersController.editUser('${user.id}')">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        Editar
+                    </button>
+                    <button class="btn btn-secondary text-danger hover:bg-danger/10" onclick="UsersController.confirmDelete('${user.id}')">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    editUser(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        this.editingUserId = userId;
+        document.getElementById('user-modal-title').textContent = 'Editar Usuario';
+        document.getElementById('edit-user-id').value = user.id;
+        document.getElementById('user-name').value = user.name || '';
+        document.getElementById('user-email').value = user.email || '';
+        document.getElementById('user-email').disabled = true;
+        document.getElementById('user-role').value = user.role || 'staff';
+        document.getElementById('user-transport').value = user.transport || '';
+        document.getElementById('password-field').style.display = 'none';
+
+        this.openModal('new-user-modal');
+    },
+
+    confirmDelete(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        document.getElementById('delete-user-id').value = userId;
+        document.getElementById('delete-user-name').textContent = user.name;
+
+        this.openModal('delete-user-modal');
+    },
+
+    async saveUser() {
+        const name = document.getElementById('user-name').value.trim();
+        const email = document.getElementById('user-email').value.trim();
+        const role = document.getElementById('user-role').value;
+        const transport = document.getElementById('user-transport').value;
+        const password = document.getElementById('user-password').value;
+
+        if (!name || !email) {
+            App.showToast('Preencha nome e email', 'warning');
+            return;
+        }
+
+        if (!this.editingUserId && password.length < 6) {
+            App.showToast('Senha deve ter pelo menos 6 caracteres', 'warning');
+            return;
+        }
+
+        const submitBtn = document.querySelector('#new-user-form button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span>';
+
+        try {
+            const { createNewUser, updateUser } = await import('./js/firebase-config.js');
+
+            if (this.editingUserId) {
+                await updateUser(this.editingUserId, { name, role, transport });
+                App.showToast('Usuario atualizado!', 'success');
+            } else {
+                await createNewUser({ name, email, password, role, transport });
+                App.showToast('Usuario criado!', 'success');
+            }
+
+            this.closeModal('new-user-modal');
+            this.resetForm();
+        } catch (error) {
+            console.error('Error saving user:', error);
+            App.showToast(error.message || 'Erro ao salvar usuario', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined">save</span> Salvar';
+        }
+    },
+
+    async deleteUser() {
+        const userId = document.getElementById('delete-user-id').value;
+        if (!userId) return;
+
+        const deleteBtn = document.getElementById('confirm-delete-user-btn');
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="spinner"></span>';
+
+        try {
+            const { deleteUser } = await import('./js/firebase-config.js');
+            await deleteUser(userId);
+
+            App.showToast('Usuario excluido!', 'success');
+            this.closeModal('delete-user-modal');
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            App.showToast('Erro ao excluir usuario', 'danger');
+        } finally {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<span class="material-symbols-outlined">delete</span> Excluir';
+        }
+    }
+};
+
+// Initialize
+window.UsersController = UsersController;
+UsersController.init();
 </script>

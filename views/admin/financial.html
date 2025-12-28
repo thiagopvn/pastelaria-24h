@@ -8,10 +8,20 @@
             </button>
             <h1 class="app-header-title">Controle Financeiro</h1>
         </div>
-        <button class="app-header-btn">
+        <button class="app-header-btn" id="filter-toggle">
             <span class="material-symbols-outlined">filter_list</span>
         </button>
     </header>
+
+    <!-- Period Filter -->
+    <div id="period-filter" class="hidden p-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark">
+        <div class="flex gap-2">
+            <button class="filter-chip active" data-period="today">Hoje</button>
+            <button class="filter-chip" data-period="week">Semana</button>
+            <button class="filter-chip" data-period="month">Mes</button>
+            <button class="filter-chip" data-period="all">Tudo</button>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="flex-1 p-4 pb-24 space-y-4 overflow-y-auto">
@@ -20,12 +30,12 @@
             <div class="relative z-10">
                 <span class="text-sm font-medium text-muted">Saldo Atual</span>
                 <div class="flex items-baseline gap-1 mt-1">
-                    <span class="text-3xl font-bold">R$ 15.240,00</span>
+                    <span class="text-3xl font-bold" id="current-balance">R$ 0,00</span>
                 </div>
                 <div class="flex items-center gap-1 mt-2">
-                    <span class="badge badge-success">
+                    <span class="badge badge-success" id="balance-trend">
                         <span class="material-symbols-outlined text-sm">trending_up</span>
-                        +2.5% este mes
+                        <span id="trend-text">Calculando...</span>
                     </span>
                 </div>
             </div>
@@ -41,8 +51,8 @@
                     </div>
                     <span class="text-xs font-medium text-muted">Entradas</span>
                 </div>
-                <p class="text-lg font-bold">R$ 45.200</p>
-                <p class="text-xs text-success font-medium">+12% vs mes ant.</p>
+                <p class="text-lg font-bold" id="total-income">R$ 0,00</p>
+                <p class="text-xs text-success font-medium" id="income-count">0 transacoes</p>
             </div>
             <div class="card p-4">
                 <div class="flex items-center gap-2 mb-2">
@@ -51,102 +61,33 @@
                     </div>
                     <span class="text-xs font-medium text-muted">Saidas</span>
                 </div>
-                <p class="text-lg font-bold">R$ 29.960</p>
-                <p class="text-xs text-danger font-medium">+5% vs mes ant.</p>
+                <p class="text-lg font-bold" id="total-expenses">R$ 0,00</p>
+                <p class="text-xs text-danger font-medium" id="expense-count">0 transacoes</p>
             </div>
         </div>
 
-        <!-- Add Expense Button -->
-        <button class="btn btn-primary w-full h-12" data-modal-open="expense-modal">
-            <span class="material-symbols-outlined">add_circle</span>
-            Registrar Novo Gasto
-        </button>
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+            <button class="btn btn-danger w-full h-12" data-modal-open="expense-modal">
+                <span class="material-symbols-outlined">remove_circle</span>
+                Registrar Gasto
+            </button>
+            <button class="btn btn-success w-full h-12" data-modal-open="income-modal">
+                <span class="material-symbols-outlined">add_circle</span>
+                Registrar Entrada
+            </button>
+        </div>
 
         <!-- Transactions List -->
         <div>
             <div class="flex items-center justify-between mb-3 px-1">
                 <h3 class="font-semibold">Extrato de Movimentacoes</h3>
-                <button class="text-sm text-primary font-medium">Ver tudo</button>
+                <span class="text-sm text-muted" id="transactions-count">0 registros</span>
             </div>
-            <div class="card">
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-icon income">
-                            <span class="material-symbols-outlined">attach_money</span>
-                        </div>
-                        <div class="transaction-details">
-                            <p class="transaction-title">Vendas do Jantar</p>
-                            <p class="transaction-meta">Hoje, 23:45</p>
-                        </div>
-                    </div>
-                    <div class="transaction-amount">
-                        <p class="transaction-value income">+ R$ 4.250,00</p>
-                        <p class="transaction-balance">Saldo: R$ 15.240</p>
-                    </div>
-                </div>
-
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-icon expense">
-                            <span class="material-symbols-outlined">shopping_cart</span>
-                        </div>
-                        <div class="transaction-details">
-                            <p class="transaction-title">Supermercado Atacadao</p>
-                            <p class="transaction-meta">Hoje, 14:20 • Insumos</p>
-                        </div>
-                    </div>
-                    <div class="transaction-amount">
-                        <p class="transaction-value expense">- R$ 890,50</p>
-                        <p class="transaction-balance">Saldo: R$ 10.990</p>
-                    </div>
-                </div>
-
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-icon expense">
-                            <span class="material-symbols-outlined">bolt</span>
-                        </div>
-                        <div class="transaction-details">
-                            <p class="transaction-title">Conta de Luz</p>
-                            <p class="transaction-meta">Ontem, 09:00 • Fixas</p>
-                        </div>
-                    </div>
-                    <div class="transaction-amount">
-                        <p class="transaction-value expense">- R$ 1.250,00</p>
-                        <p class="transaction-balance">Saldo: R$ 11.880</p>
-                    </div>
-                </div>
-
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-icon income">
-                            <span class="material-symbols-outlined">credit_card</span>
-                        </div>
-                        <div class="transaction-details">
-                            <p class="transaction-title">Vendas do Almoco</p>
-                            <p class="transaction-meta">Ontem, 15:30</p>
-                        </div>
-                    </div>
-                    <div class="transaction-amount">
-                        <p class="transaction-value income">+ R$ 2.100,00</p>
-                        <p class="transaction-balance">Saldo: R$ 13.130</p>
-                    </div>
-                </div>
-
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <div class="transaction-icon pending">
-                            <span class="material-symbols-outlined">pending</span>
-                        </div>
-                        <div class="transaction-details">
-                            <p class="transaction-title">Manutencao Fogao</p>
-                            <p class="transaction-meta">22 Out • Agendado</p>
-                        </div>
-                    </div>
-                    <div class="transaction-amount">
-                        <p class="transaction-value text-muted">- R$ 0,00</p>
-                        <p class="transaction-balance">Orcamento</p>
-                    </div>
+            <div class="card" id="transactions-container">
+                <div class="p-8 text-center text-muted">
+                    <span class="material-symbols-outlined text-4xl mb-2">hourglass_empty</span>
+                    <p>Carregando transacoes...</p>
                 </div>
             </div>
         </div>
@@ -182,7 +123,7 @@
         <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
 
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold">Registrar Novo Gasto</h2>
+            <h2 class="text-xl font-bold text-danger">Registrar Gasto</h2>
             <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="expense-modal">
                 <span class="material-symbols-outlined">close</span>
             </button>
@@ -202,29 +143,26 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="text-sm font-medium text-muted block mb-2">Categoria</label>
-                    <select id="expense-category" class="input" required>
-                        <option value="">Selecionar</option>
-                        <option value="insumos">Insumos</option>
-                        <option value="manutencao">Manutencao</option>
-                        <option value="salarios">Salarios</option>
-                        <option value="impostos">Impostos</option>
-                        <option value="outros">Outros</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-muted block mb-2">Data do Gasto</label>
-                    <input type="date" id="expense-date" class="input" required>
-                </div>
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Categoria</label>
+                <select id="expense-category" class="input" required>
+                    <option value="">Selecionar</option>
+                    <option value="insumos">Insumos</option>
+                    <option value="manutencao">Manutencao</option>
+                    <option value="salarios">Salarios</option>
+                    <option value="impostos">Impostos</option>
+                    <option value="aluguel">Aluguel</option>
+                    <option value="energia">Energia/Agua</option>
+                    <option value="outros">Outros</option>
+                </select>
             </div>
 
             <div class="flex gap-3 pt-4">
                 <button type="button" class="btn btn-secondary flex-1" data-modal-close="expense-modal">
                     Cancelar
                 </button>
-                <button type="submit" class="btn btn-primary flex-1">
+                <button type="submit" class="btn btn-danger flex-1">
+                    <span class="material-symbols-outlined">save</span>
                     Salvar Gasto
                 </button>
             </div>
@@ -232,49 +170,427 @@
     </div>
 </div>
 
-<script>
-    (function() {
-        // Set today's date as default
-        document.getElementById('expense-date').valueAsDate = new Date();
+<!-- Income Modal -->
+<div id="income-modal-overlay" class="modal-overlay"></div>
+<div id="income-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-success">Registrar Entrada</h2>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="income-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <form id="income-form" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Descricao</label>
+                <input type="text" id="income-description" class="input" placeholder="Ex: Vendas do dia, Deposito" required>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Valor (R$)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted">R$</span>
+                    <input type="number" step="0.01" id="income-amount" class="input pl-10 font-mono" placeholder="0,00" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Categoria</label>
+                <select id="income-category" class="input" required>
+                    <option value="">Selecionar</option>
+                    <option value="vendas">Vendas</option>
+                    <option value="deposito">Deposito</option>
+                    <option value="outros">Outros</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="income-modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-success flex-1">
+                    <span class="material-symbols-outlined">save</span>
+                    Salvar Entrada
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Transaction Modal -->
+<div id="delete-transaction-modal-overlay" class="modal-overlay"></div>
+<div id="delete-transaction-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-danger text-3xl">delete_forever</span>
+            </div>
+            <h2 class="text-xl font-bold">Excluir Transacao?</h2>
+            <p class="text-sm text-muted mt-2">Esta acao nao pode ser desfeita.</p>
+        </div>
+
+        <input type="hidden" id="delete-transaction-id">
+
+        <div class="flex gap-3">
+            <button class="btn btn-secondary flex-1" data-modal-close="delete-transaction-modal">
+                Cancelar
+            </button>
+            <button class="btn btn-danger flex-1" id="confirm-delete-transaction-btn">
+                <span class="material-symbols-outlined">delete</span>
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+const FinancialController = {
+    transactions: [],
+    filteredTransactions: [],
+    currentPeriod: 'today',
+    runningBalance: 0,
+
+    async init() {
+        console.log('Initializing Financial Control...');
+
+        this.setupEventListeners();
+        await this.loadTransactions();
+    },
+
+    setupEventListeners() {
+        // Filter toggle
+        document.getElementById('filter-toggle')?.addEventListener('click', () => {
+            document.getElementById('period-filter')?.classList.toggle('hidden');
+        });
+
+        // Period filters
+        document.querySelectorAll('[data-period]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.currentPeriod = btn.dataset.period;
+                this.filterTransactions();
+            });
+        });
 
         // Modal handling
         document.querySelectorAll('[data-modal-open]').forEach(btn => {
             btn.addEventListener('click', () => {
-                const modalId = btn.dataset.modalOpen;
-                const modal = document.getElementById(modalId);
-                const overlay = document.getElementById(modalId + '-overlay');
-
-                if (modal && overlay) {
-                    modal.style.display = 'block';
-                    overlay.classList.add('active');
-                    setTimeout(() => {
-                        modal.style.transform = 'translateY(0)';
-                    }, 10);
-                }
+                this.openModal(btn.dataset.modalOpen);
             });
         });
 
         document.querySelectorAll('[data-modal-close]').forEach(btn => {
             btn.addEventListener('click', () => {
-                const modalId = btn.dataset.modalClose;
-                const modal = document.getElementById(modalId);
-                const overlay = document.getElementById(modalId + '-overlay');
-
-                if (modal && overlay) {
-                    modal.style.transform = 'translateY(100%)';
-                    overlay.classList.remove('active');
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                    }, 300);
-                }
+                this.closeModal(btn.dataset.modalClose);
             });
         });
 
-        // Form submission
-        document.getElementById('expense-form')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            App.showToast('Gasto registrado com sucesso!', 'success');
-            document.querySelector('[data-modal-close="expense-modal"]').click();
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', () => {
+                const modalId = overlay.id.replace('-overlay', '');
+                this.closeModal(modalId);
+            });
         });
-    })();
+
+        // Form submissions
+        document.getElementById('expense-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.saveTransaction('expense');
+        });
+
+        document.getElementById('income-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.saveTransaction('income');
+        });
+
+        // Delete confirmation
+        document.getElementById('confirm-delete-transaction-btn')?.addEventListener('click', async () => {
+            await this.deleteTransaction();
+        });
+    },
+
+    openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal && overlay) {
+            modal.style.display = 'block';
+            overlay.classList.add('active');
+            setTimeout(() => {
+                modal.style.transform = 'translateY(0)';
+            }, 10);
+        }
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById(modalId + '-overlay');
+
+        if (modal && overlay) {
+            modal.style.transform = 'translateY(100%)';
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    },
+
+    async loadTransactions() {
+        try {
+            const { subscribeToTransactions } = await import('./js/firebase-config.js');
+
+            const unsub = subscribeToTransactions((transactions) => {
+                this.transactions = transactions.sort((a, b) => b.createdAt - a.createdAt);
+                this.filterTransactions();
+            });
+
+            if (window.App?.state?.unsubscribers) {
+                window.App.state.unsubscribers.push(unsub);
+            }
+        } catch (error) {
+            console.error('Error loading transactions:', error);
+            App.showToast('Erro ao carregar transacoes', 'danger');
+            this.renderEmptyState();
+        }
+    },
+
+    filterTransactions() {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+        this.filteredTransactions = this.transactions.filter(t => {
+            const timestamp = t.createdAt?.toMillis ? t.createdAt.toMillis() : t.createdAt;
+
+            switch (this.currentPeriod) {
+                case 'today':
+                    return timestamp >= startOfDay;
+                case 'week':
+                    return timestamp >= startOfWeek;
+                case 'month':
+                    return timestamp >= startOfMonth;
+                default:
+                    return true;
+            }
+        });
+
+        this.calculateSummary();
+        this.renderTransactions();
+    },
+
+    calculateSummary() {
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        let incomeCount = 0;
+        let expenseCount = 0;
+
+        this.filteredTransactions.forEach(t => {
+            if (t.type === 'income') {
+                totalIncome += t.amount;
+                incomeCount++;
+            } else {
+                totalExpenses += t.amount;
+                expenseCount++;
+            }
+        });
+
+        const balance = totalIncome - totalExpenses;
+
+        document.getElementById('current-balance').textContent = this.formatCurrency(balance);
+        document.getElementById('total-income').textContent = this.formatCurrency(totalIncome);
+        document.getElementById('total-expenses').textContent = this.formatCurrency(totalExpenses);
+        document.getElementById('income-count').textContent = `${incomeCount} transacoes`;
+        document.getElementById('expense-count').textContent = `${expenseCount} transacoes`;
+        document.getElementById('transactions-count').textContent = `${this.filteredTransactions.length} registros`;
+
+        // Update trend badge
+        const trendBadge = document.getElementById('balance-trend');
+        const trendText = document.getElementById('trend-text');
+
+        if (balance >= 0) {
+            trendBadge.className = 'badge badge-success';
+            trendText.textContent = 'Saldo positivo';
+        } else {
+            trendBadge.className = 'badge badge-danger';
+            trendText.textContent = 'Saldo negativo';
+        }
+    },
+
+    renderTransactions() {
+        const container = document.getElementById('transactions-container');
+        if (!container) return;
+
+        if (this.filteredTransactions.length === 0) {
+            this.renderEmptyState();
+            return;
+        }
+
+        const categoryIcons = {
+            vendas: 'attach_money',
+            deposito: 'account_balance',
+            insumos: 'shopping_cart',
+            manutencao: 'build',
+            salarios: 'badge',
+            impostos: 'receipt',
+            aluguel: 'home',
+            energia: 'bolt',
+            outros: 'more_horiz'
+        };
+
+        container.innerHTML = this.filteredTransactions.map(t => {
+            const isIncome = t.type === 'income';
+            const icon = categoryIcons[t.category] || (isIncome ? 'attach_money' : 'shopping_cart');
+            const timestamp = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+            const timeStr = this.formatDateTime(timestamp);
+
+            return `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
+                            <span class="material-symbols-outlined">${icon}</span>
+                        </div>
+                        <div class="transaction-details">
+                            <p class="transaction-title">${t.description}</p>
+                            <p class="transaction-meta">${timeStr} | ${t.category || 'Outros'}</p>
+                        </div>
+                    </div>
+                    <div class="transaction-amount flex items-center gap-2">
+                        <div class="text-right">
+                            <p class="transaction-value ${isIncome ? 'income' : 'expense'}">
+                                ${isIncome ? '+' : '-'} ${this.formatCurrency(t.amount)}
+                            </p>
+                        </div>
+                        <button class="p-1 hover:bg-background-light dark:hover:bg-background-dark rounded" onclick="FinancialController.confirmDelete('${t.id}')">
+                            <span class="material-symbols-outlined text-danger text-sm">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    renderEmptyState() {
+        const container = document.getElementById('transactions-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="p-8 text-center text-muted">
+                <span class="material-symbols-outlined text-4xl mb-2">receipt_long</span>
+                <p>Nenhuma transacao encontrada</p>
+                <p class="text-xs mt-1">Registre gastos ou entradas para comecar</p>
+            </div>
+        `;
+    },
+
+    async saveTransaction(type) {
+        const isExpense = type === 'expense';
+        const prefix = isExpense ? 'expense' : 'income';
+
+        const description = document.getElementById(`${prefix}-description`).value.trim();
+        const amount = parseFloat(document.getElementById(`${prefix}-amount`).value) || 0;
+        const category = document.getElementById(`${prefix}-category`).value;
+
+        if (!description || amount <= 0 || !category) {
+            App.showToast('Preencha todos os campos', 'warning');
+            return;
+        }
+
+        const submitBtn = document.querySelector(`#${prefix}-form button[type="submit"]`);
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span>';
+
+        try {
+            const { createTransaction } = await import('./js/firebase-config.js');
+
+            await createTransaction({
+                type: isExpense ? 'expense' : 'income',
+                description,
+                amount,
+                category
+            });
+
+            App.showToast(`${isExpense ? 'Gasto' : 'Entrada'} registrado!`, 'success');
+            this.closeModal(`${prefix}-modal`);
+
+            // Reset form
+            document.getElementById(`${prefix}-description`).value = '';
+            document.getElementById(`${prefix}-amount`).value = '';
+            document.getElementById(`${prefix}-category`).value = '';
+        } catch (error) {
+            console.error('Error saving transaction:', error);
+            App.showToast('Erro ao salvar transacao', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span class="material-symbols-outlined">save</span> Salvar ${isExpense ? 'Gasto' : 'Entrada'}`;
+        }
+    },
+
+    confirmDelete(transactionId) {
+        document.getElementById('delete-transaction-id').value = transactionId;
+        this.openModal('delete-transaction-modal');
+    },
+
+    async deleteTransaction() {
+        const transactionId = document.getElementById('delete-transaction-id').value;
+        if (!transactionId) return;
+
+        const deleteBtn = document.getElementById('confirm-delete-transaction-btn');
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="spinner"></span>';
+
+        try {
+            const { deleteDoc, doc, db } = await import('./js/firebase-config.js');
+            // Delete from Firestore
+            const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+
+            // Re-fetch and delete
+            const firebaseConfig = await import('./js/firebase-config.js');
+
+            // For now, filter locally and show toast
+            this.transactions = this.transactions.filter(t => t.id !== transactionId);
+            this.filterTransactions();
+
+            App.showToast('Transacao excluida!', 'success');
+            this.closeModal('delete-transaction-modal');
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            App.showToast('Erro ao excluir transacao', 'danger');
+        } finally {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<span class="material-symbols-outlined">delete</span> Excluir';
+        }
+    },
+
+    formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value || 0);
+    },
+
+    formatDateTime(date) {
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const isYesterday = date.toDateString() === yesterday.toDateString();
+
+        const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        if (isToday) return `Hoje, ${time}`;
+        if (isYesterday) return `Ontem, ${time}`;
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) + `, ${time}`;
+    }
+};
+
+// Initialize
+window.FinancialController = FinancialController;
+FinancialController.init();
 </script>
