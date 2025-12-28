@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check roles
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isEmployee() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'employee';
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Users: Users can read their own profile, Admins can read/write all
+    match /users/{userId} {
+      allow read, update: if isAuthenticated() && request.auth.uid == userId;
+      allow read, write: if isAdmin();
+    }
+
+    // Products: Read accessible to auth users, Write only Admin
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Shifts: Employees can read/create/update their own OPEN shifts.
+    // Admins can access everything.
+    match /shifts/{shiftId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid && resource.data.status == 'open');
+      allow delete: if isAdmin();
+
+      // Sales and consumption records
+      match /records/{recordId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if isAdmin() || (isAuthenticated() && get(/databases/$(database)/documents/shifts/$(shiftId)).data.userId == request.auth.uid);
+      }
+
+      // Team members per shift
+      match /team/{memberId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if isAdmin() || (isAuthenticated() && get(/databases/$(database)/documents/shifts/$(shiftId)).data.userId == request.auth.uid);
+      }
+
+      // Withdrawals (sangrias) during shift
+      match /withdrawals/{withdrawalId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && get(/databases/$(database)/documents/shifts/$(shiftId)).data.userId == request.auth.uid;
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // Financial movements (admin only for write)
+    match /financial_movements/{movementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Global configurations
+    match /configurations/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
