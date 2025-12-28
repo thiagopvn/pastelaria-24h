@@ -1,0 +1,215 @@
+<!-- Weekly Reports -->
+<div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
+    <!-- Header -->
+    <header class="app-header glass">
+        <div class="flex items-center gap-3">
+            <button class="app-header-btn" data-nav="admin-dashboard">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="app-header-title">Relatorios Semanais</h1>
+        </div>
+        <button class="app-header-btn relative">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full"></span>
+        </button>
+    </header>
+
+    <!-- Date Navigator -->
+    <div class="p-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark">
+        <div class="flex items-center justify-between bg-background-light dark:bg-background-dark rounded-lg p-1 border border-border-light dark:border-border-dark">
+            <button class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-card-light dark:hover:bg-card-dark text-muted transition-colors">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <div class="flex flex-col items-center">
+                <span class="text-sm font-semibold">16 Out - 22 Out</span>
+                <span class="text-xs text-muted">Semana 42, 2024</span>
+            </div>
+            <button class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-card-light dark:hover:bg-card-dark text-muted transition-colors">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 pb-32 space-y-4 overflow-y-auto">
+        <!-- Load Data Button -->
+        <button class="btn btn-secondary w-full" id="load-data-btn">
+            <span class="material-symbols-outlined">sync</span>
+            Carregar Dados da Folha
+        </button>
+
+        <!-- Global Settings -->
+        <details class="card group">
+            <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-lg">tune</span>
+                    </div>
+                    <span class="font-semibold text-sm">Configuracoes Globais</span>
+                </div>
+                <span class="material-symbols-outlined text-muted transition-transform group-open:rotate-180">expand_more</span>
+            </summary>
+            <div class="px-4 pb-4 pt-1 border-t border-border-light dark:border-border-dark grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-medium text-muted">Valor Hora</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">R$</span>
+                        <input type="number" class="input pl-9 text-sm" value="15.00">
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-medium text-muted">Vale Alimentacao</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">R$</span>
+                        <input type="number" class="input pl-9 text-sm" value="25.00">
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <!-- Employees Header -->
+        <div class="flex items-center justify-between pt-2">
+            <h2 class="text-sm font-bold text-muted uppercase tracking-wider">Funcionarios (4)</h2>
+            <div class="text-xs text-muted">Total: R$ 6.180,00</div>
+        </div>
+
+        <!-- Employee Cards -->
+        <div class="space-y-4">
+            <!-- Employee 1 -->
+            <div class="card overflow-hidden">
+                <div class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-background-light/50 dark:bg-background-dark/50">
+                    <div class="flex items-center gap-3">
+                        <img src="https://ui-avatars.com/api/?name=Carlos+Mendes&background=random" alt="Carlos" class="w-10 h-10 rounded-full">
+                        <div>
+                            <h3 class="font-bold leading-tight">Carlos Mendes</h3>
+                            <p class="text-xs text-muted">Cozinheiro Chefe</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-muted">A Pagar</div>
+                        <div class="text-lg font-bold text-success">R$ 2.450,00</div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-4 mb-4">
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Horas Trabalhadas</span>
+                            <span class="text-sm font-semibold">44h</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Transporte</span>
+                            <span class="text-sm font-semibold">R$ 80,00</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Alimentacao</span>
+                            <span class="text-sm font-semibold">R$ 150,00</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Consumo Loja</span>
+                            <span class="text-sm font-semibold">R$ 45,00</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-success flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">add_circle</span>
+                                Adicional
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted text-xs">R$</span>
+                                <input type="number" class="input pl-7 text-sm h-9" placeholder="0,00">
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-danger flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">remove_circle</span>
+                                Desconto
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted text-xs">R$</span>
+                                <input type="number" class="input pl-7 text-sm h-9" placeholder="0,00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee 2 -->
+            <div class="card overflow-hidden">
+                <div class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-background-light/50 dark:bg-background-dark/50">
+                    <div class="flex items-center gap-3">
+                        <img src="https://ui-avatars.com/api/?name=Ana+Silva&background=random" alt="Ana" class="w-10 h-10 rounded-full">
+                        <div>
+                            <h3 class="font-bold leading-tight">Ana Silva</h3>
+                            <p class="text-xs text-muted">Atendente</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-muted">A Pagar</div>
+                        <div class="text-lg font-bold text-success">R$ 1.820,00</div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-4 mb-4">
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Horas Trabalhadas</span>
+                            <span class="text-sm font-semibold">38h</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Transporte</span>
+                            <span class="text-sm font-semibold">R$ 60,00</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Alimentacao</span>
+                            <span class="text-sm font-semibold">R$ 120,00</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs uppercase tracking-wider text-muted font-medium">Consumo Loja</span>
+                            <span class="text-sm font-semibold">R$ 12,00</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-success">Adicional</label>
+                            <div class="relative">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted text-xs">R$</span>
+                                <input type="number" class="input pl-7 text-sm h-9" placeholder="0,00">
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-danger">Desconto</label>
+                            <div class="relative">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted text-xs">R$</span>
+                                <input type="number" class="input pl-7 text-sm h-9" placeholder="0,00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sticky Footer Actions -->
+    <div class="fixed bottom-0 left-0 w-full max-w-md mx-auto bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark p-4 pb-6 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="flex gap-3">
+            <button class="btn btn-primary flex-1 h-12">
+                <span class="material-symbols-outlined">save</span>
+                Salvar Relatorio
+            </button>
+            <button class="btn btn-secondary w-12 h-12 !p-0" title="Exportar PDF">
+                <span class="material-symbols-outlined">picture_as_pdf</span>
+            </button>
+            <button class="btn btn-secondary w-12 h-12 !p-0" title="Exportar Excel">
+                <span class="material-symbols-outlined">table_view</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        document.getElementById('load-data-btn')?.addEventListener('click', () => {
+            App.showToast('Dados carregados com sucesso!', 'success');
+        });
+    })();
+</script>

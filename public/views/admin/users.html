@@ -1,0 +1,291 @@
+<!-- Users Management -->
+<div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
+    <!-- Header -->
+    <header class="app-header glass">
+        <div class="flex items-center gap-3">
+            <button class="app-header-btn" data-nav="admin-dashboard">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div>
+                <h1 class="app-header-title">Gestao de Usuarios</h1>
+                <p class="text-xs text-muted">32 membros ativos</p>
+            </div>
+        </div>
+        <button class="btn btn-primary w-10 h-10 !p-0 rounded-full" data-modal-open="new-user-modal">
+            <span class="material-symbols-outlined">add</span>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 pb-24 space-y-4">
+        <!-- Search -->
+        <div class="search-bar">
+            <div class="icon">
+                <span class="material-symbols-outlined">search</span>
+            </div>
+            <input type="text" placeholder="Buscar nome ou email" id="user-search">
+        </div>
+
+        <!-- Role Filters -->
+        <div class="filter-chips -mx-4 px-4">
+            <button class="filter-chip active">Todos</button>
+            <button class="filter-chip">Admin</button>
+            <button class="filter-chip">Funcionario</button>
+        </div>
+
+        <!-- Users List -->
+        <div class="space-y-3" id="users-list">
+            <div class="user-card">
+                <div class="user-card-header">
+                    <div class="user-card-info">
+                        <img src="https://ui-avatars.com/api/?name=Carlos+Silva&background=random" alt="Carlos" class="user-card-avatar">
+                        <div>
+                            <h3 class="user-card-name">Carlos Silva</h3>
+                            <p class="user-card-email">carlos@restaurante.com</p>
+                        </div>
+                    </div>
+                    <span class="user-card-role admin">Admin</span>
+                </div>
+                <div class="user-card-transport">
+                    <span class="material-symbols-outlined">directions_car</span>
+                    <span class="font-medium">Carro Proprio</span>
+                </div>
+                <div class="user-card-actions">
+                    <button class="btn btn-secondary">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        Editar
+                    </button>
+                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-card">
+                <div class="user-card-header">
+                    <div class="user-card-info">
+                        <img src="https://ui-avatars.com/api/?name=Ana+Souza&background=random" alt="Ana" class="user-card-avatar">
+                        <div>
+                            <h3 class="user-card-name">Ana Souza</h3>
+                            <p class="user-card-email">ana@restaurante.com</p>
+                        </div>
+                    </div>
+                    <span class="user-card-role staff">Staff</span>
+                </div>
+                <div class="user-card-transport">
+                    <span class="material-symbols-outlined">directions_bus</span>
+                    <span class="font-medium">Linha 304 - Centro</span>
+                </div>
+                <div class="user-card-actions">
+                    <button class="btn btn-secondary">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        Editar
+                    </button>
+                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-card">
+                <div class="user-card-header">
+                    <div class="user-card-info">
+                        <img src="https://ui-avatars.com/api/?name=Roberto+Lima&background=random" alt="Roberto" class="user-card-avatar">
+                        <div>
+                            <h3 class="user-card-name">Roberto Lima</h3>
+                            <p class="user-card-email">roberto@restaurante.com</p>
+                        </div>
+                    </div>
+                    <span class="user-card-role staff">Staff</span>
+                </div>
+                <div class="user-card-transport">
+                    <span class="material-symbols-outlined">directions_walk</span>
+                    <span class="font-medium">Reside proximo (A pe)</span>
+                </div>
+                <div class="user-card-actions">
+                    <button class="btn btn-secondary">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        Editar
+                    </button>
+                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-card">
+                <div class="user-card-header">
+                    <div class="user-card-info">
+                        <img src="https://ui-avatars.com/api/?name=Mariana+Costa&background=random" alt="Mariana" class="user-card-avatar">
+                        <div>
+                            <h3 class="user-card-name">Mariana Costa</h3>
+                            <p class="user-card-email">mariana@restaurante.com</p>
+                        </div>
+                    </div>
+                    <span class="user-card-role staff">Staff</span>
+                </div>
+                <div class="user-card-transport">
+                    <span class="material-symbols-outlined">two_wheeler</span>
+                    <span class="font-medium">Moto Propria</span>
+                </div>
+                <div class="user-card-actions">
+                    <button class="btn btn-secondary">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                        Editar
+                    </button>
+                    <button class="btn btn-secondary text-danger hover:bg-danger/10">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-container">
+            <button class="bottom-nav-item" data-nav="admin-dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Inicio</span>
+            </button>
+            <button class="bottom-nav-item" data-nav="products">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span>Produtos</span>
+            </button>
+            <button class="bottom-nav-item active" data-nav="users">
+                <span class="material-symbols-outlined">group</span>
+                <span>Equipe</span>
+            </button>
+            <button class="bottom-nav-item" data-nav="financial">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <span>Financeiro</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<!-- New User Modal -->
+<div id="new-user-modal-overlay" class="modal-overlay"></div>
+<div id="new-user-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold">Novo Usuario</h2>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="new-user-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <form id="new-user-form" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Nome Completo</label>
+                <input type="text" id="user-name" class="input" placeholder="Nome do funcionario" required>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">E-mail</label>
+                <input type="email" id="user-email" class="input" placeholder="email@exemplo.com" required>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Funcao</label>
+                <select id="user-role" class="input" required>
+                    <option value="staff">Funcionario</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Transporte</label>
+                <select id="user-transport" class="input">
+                    <option value="">Selecione...</option>
+                    <option value="car">Carro Proprio</option>
+                    <option value="motorcycle">Moto Propria</option>
+                    <option value="bus">Onibus</option>
+                    <option value="walk">A pe</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Senha Inicial</label>
+                <input type="password" id="user-password" class="input" placeholder="Minimo 6 caracteres" required minlength="6">
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="new-user-modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary flex-1">
+                    Criar Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Filter chips
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            });
+        });
+
+        // Search functionality
+        document.getElementById('user-search')?.addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            document.querySelectorAll('.user-card').forEach(card => {
+                const name = card.querySelector('.user-card-name').textContent.toLowerCase();
+                const email = card.querySelector('.user-card-email').textContent.toLowerCase();
+                card.style.display = name.includes(search) || email.includes(search) ? 'block' : 'none';
+            });
+        });
+
+        // Modal handling
+        document.querySelectorAll('[data-modal-open]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.modalOpen;
+                const modal = document.getElementById(modalId);
+                const overlay = document.getElementById(modalId + '-overlay');
+
+                if (modal && overlay) {
+                    modal.style.display = 'block';
+                    overlay.classList.add('active');
+                    setTimeout(() => {
+                        modal.style.transform = 'translateY(0)';
+                    }, 10);
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-modal-close]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.modalClose;
+                const modal = document.getElementById(modalId);
+                const overlay = document.getElementById(modalId + '-overlay');
+
+                if (modal && overlay) {
+                    modal.style.transform = 'translateY(100%)';
+                    overlay.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('new-user-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            App.showToast('Usuario criado com sucesso!', 'success');
+            document.querySelector('[data-modal-close="new-user-modal"]').click();
+        });
+    })();
+</script>

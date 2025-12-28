@@ -1,0 +1,345 @@
+<!-- Admin Dashboard -->
+<div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
+    <!-- Header -->
+    <header class="app-header glass">
+        <div class="flex items-center gap-3">
+            <button class="app-header-btn" id="menu-toggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h1 class="app-header-title">Dashboard</h1>
+        </div>
+        <div class="app-header-actions">
+            <button class="app-header-btn relative">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full animate-pulse"></span>
+            </button>
+            <button class="w-8 h-8 rounded-full overflow-hidden border border-border-light dark:border-border-dark">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=2094f3&color=fff" alt="Admin" class="w-full h-full object-cover">
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 pb-24 space-y-6 overflow-y-auto">
+        <!-- Welcome -->
+        <div class="space-y-1">
+            <p class="text-sm text-muted font-medium">Bem-vindo de volta,</p>
+            <h2 class="text-2xl font-bold">Administrador</h2>
+        </div>
+
+        <!-- Period Selector -->
+        <div class="period-selector">
+            <button class="period-option active">Hoje</button>
+            <button class="period-option">Semana</button>
+            <button class="period-option">Mes</button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <span class="stats-card-label">Vendas Totais</span>
+                    <div class="stats-card-icon">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                </div>
+                <div class="stats-card-value">R$ 4.250</div>
+                <div class="stats-card-trend up">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    +12%
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <span class="stats-card-label">Ticket Medio</span>
+                    <div class="stats-card-icon">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                    </div>
+                </div>
+                <div class="stats-card-value">R$ 45,00</div>
+                <div class="stats-card-trend up">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    +2%
+                </div>
+            </div>
+            <div class="stats-card border-danger/20 bg-danger/5">
+                <div class="stats-card-header">
+                    <span class="stats-card-label text-danger">Divergencias</span>
+                    <div class="stats-card-icon text-danger">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                </div>
+                <div class="stats-card-value text-danger">-R$ 12,50</div>
+                <div class="stats-card-trend down">
+                    <span class="material-symbols-outlined">trending_down</span>
+                    -5%
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <span class="stats-card-label">Turnos Ativos</span>
+                    <div class="stats-card-icon">
+                        <span class="material-symbols-outlined">groups</span>
+                    </div>
+                </div>
+                <div class="stats-card-value">5</div>
+                <span class="text-xs text-muted">Funcionarios</span>
+            </div>
+        </div>
+
+        <!-- Sales Chart -->
+        <div class="card">
+            <div class="p-4 border-b border-border-light dark:border-border-dark">
+                <h3 class="font-semibold">Vendas por Hora</h3>
+                <p class="text-xs text-muted">Hoje vs. Media</p>
+            </div>
+            <div class="p-4">
+                <div class="h-40 flex items-end justify-between gap-2">
+                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 40%"></div>
+                        </div>
+                        <span class="text-xs text-muted">10h</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 65%"></div>
+                        </div>
+                        <span class="text-xs text-muted">12h</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 85%"></div>
+                        </div>
+                        <span class="text-xs text-muted">14h</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 55%"></div>
+                        </div>
+                        <span class="text-xs text-muted">16h</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 70%"></div>
+                        </div>
+                        <span class="text-xs text-muted">18h</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                        <div class="w-full bg-primary/20 h-24 rounded-t relative hover:bg-primary/30 transition-colors">
+                            <div class="absolute bottom-0 w-full bg-primary rounded-t" style="height: 30%"></div>
+                        </div>
+                        <span class="text-xs text-muted">20h</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between px-1">
+                <h3 class="font-semibold">Alertas e Divergencias</h3>
+                <span class="badge badge-danger">2 Novos</span>
+            </div>
+            <div class="space-y-2">
+                <div class="alert-card error">
+                    <div class="alert-card-icon">
+                        <span class="material-symbols-outlined">error</span>
+                    </div>
+                    <div class="alert-card-content">
+                        <h4>Divergencia de Caixa</h4>
+                        <p>Caixa 02 fechou com falta de R$ 12,50.</p>
+                    </div>
+                </div>
+                <div class="alert-card warning">
+                    <div class="alert-card-icon">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                    <div class="alert-card-content">
+                        <h4>Estoque Baixo</h4>
+                        <p>Massa de Pastel Tradicional (Critico).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Shifts -->
+        <div class="card">
+            <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
+                <h3 class="font-semibold">Monitor de Turnos</h3>
+                <span class="text-success text-sm font-medium">5 ativos</span>
+            </div>
+            <div class="divide-y divide-border-light dark:divide-border-dark">
+                <div class="shift-item">
+                    <div class="shift-user">
+                        <div class="shift-avatar-wrapper">
+                            <img src="https://ui-avatars.com/api/?name=Carlos+Silva&background=random" alt="Carlos" class="shift-avatar">
+                            <div class="shift-status active"></div>
+                        </div>
+                        <div class="shift-info">
+                            <h4>Carlos Silva</h4>
+                            <p class="shift-meta">Caixa • 06:12h</p>
+                        </div>
+                    </div>
+                    <button class="shift-action">Ver</button>
+                </div>
+                <div class="shift-item">
+                    <div class="shift-user">
+                        <div class="shift-avatar-wrapper">
+                            <img src="https://ui-avatars.com/api/?name=Ana+Souza&background=random" alt="Ana" class="shift-avatar">
+                            <div class="shift-status active"></div>
+                        </div>
+                        <div class="shift-info">
+                            <h4>Ana Souza</h4>
+                            <p class="shift-meta">Cozinha • 05:45h</p>
+                        </div>
+                    </div>
+                    <button class="shift-action">Ver</button>
+                </div>
+                <div class="shift-item">
+                    <div class="shift-user">
+                        <div class="shift-avatar-wrapper">
+                            <div class="shift-avatar bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-muted">MJ</div>
+                            <div class="shift-status paused"></div>
+                        </div>
+                        <div class="shift-info">
+                            <h4>Maria Julia</h4>
+                            <p class="shift-meta">Atendimento • 00:15h (Pausa)</p>
+                        </div>
+                    </div>
+                    <button class="shift-action">Ver</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card p-4">
+            <h3 class="font-semibold mb-4">Atividade Recente</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <p class="timeline-time">Ha 15 min</p>
+                    <p class="timeline-content">Fechamento de caixa parcial realizado por <strong>Carlos S.</strong></p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot muted"></div>
+                    <p class="timeline-time">Ha 42 min</p>
+                    <p class="timeline-content">Sangria de R$ 150,00 autorizada para compra de insumos.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot muted"></div>
+                    <p class="timeline-time">14:30</p>
+                    <p class="timeline-content">Novo turno iniciado: <strong>Lucas M.</strong> (Entregador).</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-container">
+            <button class="bottom-nav-item active" data-nav="admin-dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Inicio</span>
+            </button>
+            <button class="bottom-nav-item" data-nav="users">
+                <span class="material-symbols-outlined">group</span>
+                <span>Equipe</span>
+            </button>
+            <button class="bottom-nav-item" data-nav="reports">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <span>Relatorios</span>
+            </button>
+            <button class="bottom-nav-item" data-nav="financial">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <span>Financeiro</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<!-- Side Menu Drawer -->
+<div id="side-menu-overlay" class="modal-overlay"></div>
+<div id="side-menu" class="fixed inset-y-0 left-0 w-3/4 max-w-xs bg-card-dark p-6 z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-xl font-bold text-white">Menu</h2>
+        <button class="text-muted hover:text-white" id="close-menu">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <nav class="space-y-2">
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary" data-nav="admin-dashboard">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-medium">Dashboard</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="products">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="font-medium">Produtos</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="users">
+            <span class="material-symbols-outlined">group</span>
+            <span class="font-medium">Usuarios</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="reports">
+            <span class="material-symbols-outlined">bar_chart</span>
+            <span class="font-medium">Relatorios</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="financial">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span class="font-medium">Financeiro</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5" data-nav="shift-corrections">
+            <span class="material-symbols-outlined">edit_note</span>
+            <span class="font-medium">Correcoes</span>
+        </a>
+    </nav>
+
+    <div class="absolute bottom-6 left-6 right-6 pt-6 border-t border-gray-800">
+        <button class="flex items-center gap-3 px-4 py-2 text-danger hover:text-red-400 w-full" data-logout>
+            <span class="material-symbols-outlined">logout</span>
+            <span class="font-medium">Sair</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Menu toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const sideMenu = document.getElementById('side-menu');
+        const sideMenuOverlay = document.getElementById('side-menu-overlay');
+        const closeMenu = document.getElementById('close-menu');
+
+        function openMenu() {
+            sideMenu.style.transform = 'translateX(0)';
+            sideMenuOverlay.classList.add('active');
+        }
+
+        function closeMenuFn() {
+            sideMenu.style.transform = 'translateX(-100%)';
+            sideMenuOverlay.classList.remove('active');
+        }
+
+        menuToggle?.addEventListener('click', openMenu);
+        closeMenu?.addEventListener('click', closeMenuFn);
+        sideMenuOverlay?.addEventListener('click', closeMenuFn);
+
+        // Period selector
+        document.querySelectorAll('.period-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Side menu navigation
+        document.querySelectorAll('#side-menu [data-nav]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeMenuFn();
+                App.navigateTo(link.dataset.nav);
+            });
+        });
+    })();
+</script>

@@ -1,0 +1,194 @@
+<!-- Auth Page - Login / Register -->
+<div class="auth-container">
+    <div class="auth-wrapper">
+        <!-- Brand Header -->
+        <div class="auth-brand">
+            <div class="auth-brand-icon">
+                <span class="material-symbols-outlined">restaurant</span>
+            </div>
+            <h1>Pastelaria 24h</h1>
+        </div>
+
+        <!-- Auth Card -->
+        <div class="auth-card">
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Entrar</button>
+                <button class="auth-tab" data-tab="register">Registrar</button>
+            </div>
+
+            <!-- Login Error -->
+            <div id="login-error" class="auth-error"></div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="login-email">E-mail</label>
+                    <div class="form-input-wrapper">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">mail</span>
+                        </div>
+                        <input
+                            type="email"
+                            id="login-email"
+                            name="login-email"
+                            placeholder="seu@email.com"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="login-password">Senha</label>
+                    <div class="form-input-wrapper">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">lock</span>
+                        </div>
+                        <input
+                            type="password"
+                            id="login-password"
+                            name="login-password"
+                            placeholder="Digite sua senha"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button type="button" class="toggle-password">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Forgot Password -->
+                <div class="forgot-password">
+                    <a href="#" onclick="App.showToast('Em breve!', 'info'); return false;">Esqueci minha senha</a>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="auth-submit">
+                    Entrar
+                </button>
+            </form>
+
+            <!-- Register Error -->
+            <div id="register-error" class="auth-error"></div>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form hidden">
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="register-name">Nome Completo</label>
+                    <div class="form-input-wrapper">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <input
+                            type="text"
+                            id="register-name"
+                            name="register-name"
+                            placeholder="Seu nome"
+                            autocomplete="name"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="register-email">E-mail</label>
+                    <div class="form-input-wrapper">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">mail</span>
+                        </div>
+                        <input
+                            type="email"
+                            id="register-email"
+                            name="register-email"
+                            placeholder="seu@email.com"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="register-password">Senha</label>
+                    <div class="form-input-wrapper">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">lock</span>
+                        </div>
+                        <input
+                            type="password"
+                            id="register-password"
+                            name="register-password"
+                            placeholder="Minimo 6 caracteres"
+                            autocomplete="new-password"
+                            required
+                            minlength="6"
+                        >
+                        <button type="button" class="toggle-password">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                    <span id="password-strength" class="text-xs mt-1"></span>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirmar Senha</label>
+                    <div class="form-input-wrapper">
+                        <div class="icon">
+                            <span class="material-symbols-outlined">lock_reset</span>
+                        </div>
+                        <input
+                            type="password"
+                            id="register-confirm-password"
+                            name="register-confirm-password"
+                            placeholder="Repita a senha"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="auth-submit">
+                    Criar Conta
+                </button>
+            </form>
+
+            <!-- Terms -->
+            <div class="auth-terms">
+                <p>
+                    Ao continuar, voce concorda com nossos
+                    <a href="#">Termos de Servico</a> e
+                    <a href="#">Politica de Privacidade</a>.
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>
+                Sistema de Gestao de Turnos<br>
+                <small class="text-muted">v1.0.0</small>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hidden { display: none !important; }
+    .field-error {
+        display: none;
+        font-size: 0.75rem;
+        color: var(--danger);
+        margin-top: 0.25rem;
+    }
+    .form-input-wrapper input.error {
+        border-color: var(--danger);
+    }
+</style>

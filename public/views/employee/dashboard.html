@@ -1,0 +1,359 @@
+<!-- Employee Dashboard -->
+<div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">
+    <!-- Header -->
+    <header class="app-header glass">
+        <div class="app-header-brand">
+            <div class="app-header-logo">
+                <span class="material-symbols-outlined">storefront</span>
+            </div>
+            <h1 class="app-header-title">Pastelaria 24h</h1>
+        </div>
+        <div class="app-header-actions">
+            <button class="app-header-btn" data-theme-toggle>
+                <span class="material-symbols-outlined">dark_mode</span>
+            </button>
+            <button class="app-header-btn" data-logout>
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 pb-24 space-y-6">
+        <!-- Welcome Section -->
+        <div class="space-y-1">
+            <p class="text-sm text-muted font-medium">Bem-vindo de volta,</p>
+            <h2 class="text-2xl font-bold" id="employee-name">Funcionario</h2>
+        </div>
+
+        <!-- Shift Status Card -->
+        <div id="shift-status-card" class="card p-5">
+            <!-- No Active Shift -->
+            <div id="no-shift" class="flex flex-col items-center text-center py-6">
+                <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl">schedule</span>
+                </div>
+                <h3 class="text-lg font-bold mb-1">Nenhum turno ativo</h3>
+                <p class="text-sm text-muted mb-6">Inicie seu turno para comecar a registrar</p>
+                <button class="btn btn-primary w-full" data-modal-open="open-shift-modal">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                    Iniciar Turno
+                </button>
+            </div>
+
+            <!-- Active Shift (hidden by default) -->
+            <div id="active-shift" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                        <span class="font-semibold text-success">Turno Ativo</span>
+                    </div>
+                    <span id="shift-timer" class="text-2xl font-bold font-mono">00:00:00</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg">
+                        <p class="text-xs text-muted mb-1">Inicio</p>
+                        <p id="shift-start-time" class="font-semibold">--:--</p>
+                    </div>
+                    <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg">
+                        <p class="text-xs text-muted mb-1">Caixa Inicial</p>
+                        <p id="shift-initial-cash" class="font-semibold">R$ 0,00</p>
+                    </div>
+                </div>
+                <button class="btn btn-danger w-full" data-modal-open="close-shift-modal">
+                    <span class="material-symbols-outlined">stop</span>
+                    Encerrar Turno
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <span class="stats-card-label">Vendas Hoje</span>
+                    <div class="stats-card-icon">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                </div>
+                <div class="stats-card-value" id="today-sales">R$ 0,00</div>
+                <div class="stats-card-trend up">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    <span>+12%</span>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <span class="stats-card-label">Pedidos</span>
+                    <div class="stats-card-icon">
+                        <span class="material-symbols-outlined">receipt</span>
+                    </div>
+                </div>
+                <div class="stats-card-value" id="today-orders">0</div>
+                <span class="text-xs text-muted">hoje</span>
+            </div>
+        </div>
+
+        <!-- Collaborators Card -->
+        <div class="card">
+            <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
+                <h3 class="font-semibold">Colaboradores no Turno</h3>
+                <span class="badge badge-success" id="active-collaborators-count">0 ativos</span>
+            </div>
+            <div id="collaborators-list" class="divide-y divide-border-light dark:divide-border-dark">
+                <!-- Empty State -->
+                <div class="empty-state py-8">
+                    <div class="empty-state-icon">
+                        <span class="material-symbols-outlined">group_off</span>
+                    </div>
+                    <h3>Nenhum colaborador</h3>
+                    <p>Nao ha colaboradores ativos no momento</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="p-4 border-b border-border-light dark:border-border-dark">
+                <h3 class="font-semibold">Atividade Recente</h3>
+            </div>
+            <div id="recent-activity" class="p-4">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <p class="timeline-time">Agora</p>
+                        <p class="timeline-content">Voce acessou o sistema</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-container">
+            <button class="bottom-nav-item active" data-nav="employee-dashboard">
+                <span class="material-symbols-outlined">home</span>
+                <span>Inicio</span>
+            </button>
+            <button class="bottom-nav-item" data-modal-open="cash-register-modal">
+                <span class="material-symbols-outlined">point_of_sale</span>
+                <span>Caixa</span>
+            </button>
+            <button class="bottom-nav-item" data-modal-open="products-modal">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span>Produtos</span>
+            </button>
+            <button class="bottom-nav-item" onclick="App.showToast('Em breve!', 'info')">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Config</span>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<!-- Open Shift Modal -->
+<div id="open-shift-modal-overlay" class="modal-overlay"></div>
+<div id="open-shift-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <!-- Handle -->
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-bold">Abrir Novo Turno</h2>
+                <p class="text-sm text-muted">Confira os valores antes de iniciar</p>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="open-shift-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Expected Values -->
+        <div class="mb-6">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">history</span>
+                Valores Esperados (Turno Anterior)
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-background-light dark:bg-background-dark p-4 rounded-xl">
+                    <span class="text-xs text-muted">Caixa Esperado</span>
+                    <p class="text-xl font-bold font-mono">R$ 450,00</p>
+                </div>
+                <div class="bg-background-light dark:bg-background-dark p-4 rounded-xl">
+                    <span class="text-xs text-muted">Moedas Esperadas</span>
+                    <p class="text-xl font-bold font-mono">R$ 52,50</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Fields -->
+        <form id="open-shift-form" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Caixa Inicial (R$)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted">R$</span>
+                    <input type="number" step="0.01" id="initial-cash" class="input pl-10 font-mono" placeholder="0,00" required>
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Moedas Iniciais (R$)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted">R$</span>
+                    <input type="number" step="0.01" id="initial-coins" class="input pl-10 font-mono" placeholder="0,00">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 pt-4">
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="open-shift-modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary flex-[2]">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Abrir Turno
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Close Shift Modal -->
+<div id="close-shift-modal-overlay" class="modal-overlay"></div>
+<div id="close-shift-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-bold">Fechar Turno</h2>
+                <p class="text-sm text-muted">Insira os valores de fechamento</p>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="close-shift-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <form id="close-shift-form" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Caixa Final (R$)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted">R$</span>
+                    <input type="number" step="0.01" id="final-cash" class="input pl-10 font-mono" placeholder="0,00" required>
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Observacoes</label>
+                <textarea id="shift-notes" class="input resize-none h-24" placeholder="Observacoes sobre o turno..."></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="close-shift-modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-danger flex-[2]">
+                    <span class="material-symbols-outlined">stop</span>
+                    Encerrar Turno
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Employee Dashboard initialization
+    (function() {
+        // Modal handling
+        document.querySelectorAll('[data-modal-open]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.modalOpen;
+                const modal = document.getElementById(modalId);
+                const overlay = document.getElementById(modalId + '-overlay');
+
+                if (modal && overlay) {
+                    modal.style.display = 'block';
+                    overlay.classList.add('active');
+                    setTimeout(() => {
+                        modal.style.transform = 'translateY(0)';
+                    }, 10);
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-modal-close]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.modalClose;
+                const modal = document.getElementById(modalId);
+                const overlay = document.getElementById(modalId + '-overlay');
+
+                if (modal && overlay) {
+                    modal.style.transform = 'translateY(100%)';
+                    overlay.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', () => {
+                const modalId = overlay.id.replace('-overlay', '');
+                const modal = document.getElementById(modalId);
+
+                if (modal) {
+                    modal.style.transform = 'translateY(100%)';
+                    overlay.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+
+        // Open Shift Form
+        document.getElementById('open-shift-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cash = document.getElementById('initial-cash').value;
+            const coins = document.getElementById('initial-coins').value || 0;
+
+            // Here you would save to Firebase
+            console.log('Opening shift with:', { cash, coins });
+            App.showToast('Turno iniciado com sucesso!', 'success');
+
+            // Close modal
+            document.querySelector('[data-modal-close="open-shift-modal"]').click();
+
+            // Update UI
+            document.getElementById('no-shift').classList.add('hidden');
+            document.getElementById('active-shift').classList.remove('hidden');
+            document.getElementById('shift-initial-cash').textContent = `R$ ${parseFloat(cash).toFixed(2)}`;
+            document.getElementById('shift-start-time').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            // Start timer
+            startShiftTimer();
+        });
+
+        // Shift timer
+        let timerInterval;
+        let shiftStartTime;
+
+        function startShiftTimer() {
+            shiftStartTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - shiftStartTime;
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('shift-timer').textContent =
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    })();
+</script>
