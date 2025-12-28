@@ -1,0 +1,450 @@
+/* ================================================
+   Users Management Styles
+   ================================================ */
+
+/* Users Header */
+.users-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.users-count {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+/* Users List */
+.users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* User Card Enhanced */
+.user-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.user-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.user-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.user-card-info {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.user-card-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+}
+
+.user-card-avatar.admin {
+    border-color: var(--primary);
+}
+
+.user-card-avatar.staff {
+    border-color: var(--success);
+}
+
+.user-card-name {
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+.user-card-email {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.125rem;
+}
+
+.user-card-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--radius);
+}
+
+.user-card-role.admin {
+    background: rgba(32, 148, 243, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(32, 148, 243, 0.2);
+}
+
+.user-card-role.staff {
+    background: rgba(22, 163, 74, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+/* User Transport Info */
+.user-card-transport {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--background-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.dark .user-card-transport {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.user-card-transport .material-symbols-outlined {
+    font-size: 1.125rem;
+    color: var(--muted);
+}
+
+.user-card-transport-label {
+    font-weight: 500;
+}
+
+/* User Card Actions */
+.user-card-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.user-card-actions .btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.user-card-actions .btn .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+/* User Stats */
+.user-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: var(--background-light);
+    border-radius: var(--radius-lg);
+}
+
+.dark .user-card-stats {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.user-stat {
+    text-align: center;
+}
+
+.user-stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.user-stat-label {
+    font-size: 0.625rem;
+    color: var(--muted);
+    margin-top: 0.125rem;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.filter-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-tab {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filter-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-tab.active {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--card);
+}
+
+.dark .filter-tab.active {
+    background: white;
+    border-color: white;
+    color: var(--background-dark);
+}
+
+/* New User Modal Form */
+.new-user-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+}
+
+/* Transport Selection */
+.transport-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.transport-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--background-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.dark .transport-option {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.transport-option:hover {
+    border-color: var(--primary);
+}
+
+.transport-option.selected {
+    border-color: var(--primary);
+    background: rgba(32, 148, 243, 0.05);
+}
+
+.transport-option input {
+    display: none;
+}
+
+.transport-option .material-symbols-outlined {
+    font-size: 1.5rem;
+    color: var(--muted);
+}
+
+.transport-option.selected .material-symbols-outlined {
+    color: var(--primary);
+}
+
+.transport-option-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.transport-option.selected .transport-option-label {
+    color: var(--primary);
+}
+
+/* User Edit Modal */
+.user-edit-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-edit-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border);
+}
+
+.user-edit-info {
+    flex: 1;
+}
+
+.user-edit-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.user-edit-email {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+/* User Status Toggle */
+.user-status-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--background-light);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+}
+
+.dark .user-status-toggle {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.user-status-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.user-status-indicator {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+}
+
+.user-status-indicator.active {
+    background: var(--success);
+}
+
+.user-status-indicator.inactive {
+    background: var(--muted);
+}
+
+/* Delete Confirmation */
+.delete-confirmation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+}
+
+.delete-confirmation-icon {
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    margin-bottom: 1rem;
+}
+
+.delete-confirmation-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.delete-confirmation-text {
+    font-size: 0.875rem;
+    color: var(--muted);
+    max-width: 20rem;
+    margin-bottom: 1.5rem;
+}
+
+.delete-confirmation-actions {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Users Empty State */
+.users-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+}
+
+.users-empty-icon {
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--background-light);
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+.dark .users-empty-icon {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.users-empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.users-empty-text {
+    font-size: 0.875rem;
+    color: var(--muted);
+    max-width: 20rem;
+}

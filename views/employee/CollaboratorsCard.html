@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Card de Colaboradores</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2094f3",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101a22",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#1e293b",
+                        "text-primary": "#0f172a",
+                        "text-secondary": "#64748b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for cleaner look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary antialiased min-h-screen flex items-center justify-center p-4">
+<!-- Main Card Container -->
+<div class="w-full max-w-md bg-white dark:bg-[#1e293b] rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] overflow-hidden border border-border-light dark:border-border-dark flex flex-col max-h-[90vh]">
+<!-- Header -->
+<div class="px-6 py-5 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-white dark:bg-[#1e293b] sticky top-0 z-10">
+<div>
+<h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Equipe do Turno</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Gerencie os colaboradores ativos</p>
+</div>
+<div class="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+<!-- Add Employee Section -->
+<div class="p-4 bg-slate-50 dark:bg-[#0f172a]/50 border-b border-border-light dark:border-border-dark">
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Adicionar Colaborador</label>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<select class="block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-[#1e293b] text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm h-11 pl-3 pr-10">
+<option disabled="" selected="" value="">Selecione um funcionário...</option>
+<option value="1">Ana Souza (Garçonete)</option>
+<option value="2">Carlos Lima (Barman)</option>
+<option value="3">Roberto Almeida (Cozinha)</option>
+</select>
+</div>
+<button class="bg-primary hover:bg-blue-600 text-white rounded-lg px-4 h-11 flex items-center justify-center transition-colors shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+</button>
+</div>
+</div>
+<!-- Employee List (Scrollable) -->
+<div class="overflow-y-auto custom-scrollbar flex-1 bg-white dark:bg-[#1e293b]">
+<ul class="divide-y divide-border-light dark:divide-border-dark">
+<!-- Item 1 -->
+<li class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+<div class="flex items-start gap-3">
+<!-- Avatar -->
+<div class="h-12 w-12 rounded-full bg-cover bg-center shrink-0 border border-slate-100 dark:border-slate-700 shadow-sm" data-alt="Portrait of a smiling man with glasses" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgqbP7jzRwpk930WsPZK61AMEsUq_5urZpkiKfKmq10JQTrP1W5svCvwlVnhVrFB27E6wZYoqsUzQt8UpoVRe7ucwkGCZ_6ZhmKjZUb8LKX1Xy1mJ7VD6i4W0ckMvHr2JSOy3srPtwT-Dn8JJF8XvTNMjsZLT9urKpLPm5hnXRnrYmwroBykzvBnj5ulP8OcUAC1B87bzg8wBMCzNNiFiRjhEsPPhVlEBrrdxA_g8iu6af9-zcSZQsUSE_NFPAPvgjv95bX8sQHKA');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-semibold text-slate-900 dark:text-white truncate">João Silva</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="inline-flex items-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20">Garçom</span>
+<span class="text-[10px] text-slate-400 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Online
+                                        </span>
+</div>
+</div>
+</div>
+<!-- Action Buttons Row -->
+<div class="mt-3 flex gap-2">
+<button class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                    Consumo
+                                </button>
+<button class="shrink-0 inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</li>
+<!-- Item 2 -->
+<li class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+<div class="flex items-start gap-3">
+<!-- Avatar -->
+<div class="h-12 w-12 rounded-full bg-cover bg-center shrink-0 border border-slate-100 dark:border-slate-700 shadow-sm" data-alt="Portrait of a young woman smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBY2or6qYFEvWly4qdCLCeCTTjRymwq5VcrwfUOfx4bgwmsLYqFUAA7hp-Ou9fmjpgbKUKwxPrqc74gFMsD1GkG8_8PhnZfWObNdQRsBUJS4H9QK-ZVWTpwtlbj3QP1Gy6Se2XS_MMjcgISJ4Bez3dkk1-mWSKyKYjwwWXqugjHefIVVyxE3jHwymZRmvoEeg7rQArT7eNgnCP98zHW4mx9D8Uk5n1LwWk3A9cCJxI71hEA3-LyE2j_zFi5MJSjByGJpsIs7fvYu9k');"></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-semibold text-slate-900 dark:text-white truncate">Maria Oliveira</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20">Gerente</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons Row -->
+<div class="mt-3 flex gap-2">
+<button class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                    Consumo
+                                </button>
+<button class="shrink-0 inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</li>
+<!-- Item 3 -->
+<li class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+<div class="flex items-start gap-3">
+<!-- Avatar (Initials Fallback style) -->
+<div class="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-300 font-bold text-lg shadow-sm">
+                            LR
+                        </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-semibold text-slate-900 dark:text-white truncate">Lucas Ribeiro</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300 ring-1 ring-inset ring-slate-500/10">Bar</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons Row -->
+<div class="mt-3 flex gap-2">
+<button class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                    Consumo
+                                </button>
+<button class="shrink-0 inline-flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<!-- Footer / Stats -->
+<div class="bg-slate-50 dark:bg-[#0f172a]/50 p-3 border-t border-border-light dark:border-border-dark flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+<span>Total: 3 funcionários</span>
+<div class="flex gap-4">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> 1 Online</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span> 2 Offline</span>
+</div>
+</div>
+</div>
+</body></html>

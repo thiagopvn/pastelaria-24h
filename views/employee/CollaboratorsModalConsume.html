@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestão de Turno</title>
+<!-- Fonts and Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2094f3", // hsl(207, 90%, 54%)
+                        "background-light": "#f4f4f5", // hsl(240, 5%, 96%)
+                        "background-dark": "#101a22",
+                        "success": "#16a34a", // hsl(142, 76%, 36%) - Approximate tailwind green-600
+                        "error": "#ef4444", // hsl(0, 84.2%, 60.2%) - Approximate tailwind red-500
+                        "card-bg": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 4px 16px -4px rgba(0, 0, 0, 0.02)',
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom scrollbar for modal list if needed */
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #d4d4d8; 
+            border-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col relative overflow-hidden">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-[#101a22]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center px-4 h-14 justify-between max-w-md mx-auto w-full">
+<button class="text-slate-900 dark:text-white flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="text-slate-900 dark:text-white text-base font-semibold leading-tight tracking-tight">Gestão de Turno</h1>
+<button class="text-slate-900 dark:text-white flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center px-4 py-6 w-full max-w-md mx-auto">
+<!-- Card: Equipe do Turno -->
+<div class="w-full bg-white dark:bg-[#1c2a36] rounded-xl border border-slate-200 dark:border-slate-700 shadow-soft overflow-hidden">
+<!-- Header Section -->
+<div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-[#1c2a36]">
+<div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold tracking-tight">Equipe do Turno</h2>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-0.5">3 colaboradores ativos</p>
+</div>
+<button class="group flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined text-lg font-bold">add</span>
+<span class="text-sm font-semibold">Adicionar</span>
+</button>
+</div>
+<!-- List of Employees -->
+<div class="flex flex-col divide-y divide-slate-100 dark:divide-slate-700">
+<!-- Employee 1: João Silva (Focus of Modal) -->
+<div class="flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group relative">
+<!-- Status Indicator -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-success rounded-r-full"></div>
+<!-- Avatar -->
+<div class="relative shrink-0">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 bg-center bg-cover border border-slate-100 dark:border-slate-600" data-alt="Portrait of employee João Silva smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDjoCyWSAb42IdLbpkIOBkJSfQTht54Uu67ETqmR6TujQ_rIaOwSGNUdh3kkmFeseuoYv7Ux9VUtTeMdfrVhXeG1RPbSaKXGrMRdEq5UCKBiZUzNtE-9ydPHqWu2JLVDmPi1wS5T-ibeYZW-xPkza1u_Er7XI8d9pI5ywuJRRtRnUU4g_xwiJUoFDYOtmS-GOwsGGRC-mfaK2pj4srv5FNd8ZSFiWAjKfBUhE7yDdmbtxrZ929REuyJS9q8-B2DFtm_Sf1617UUKts');">
+</div>
+<span class="absolute bottom-0 right-0 size-2.5 bg-success rounded-full border-2 border-white dark:border-[#1c2a36]"></span>
+</div>
+<!-- Info -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate">João Silva</p>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">Garçom</span>
+</div>
+<p class="text-success text-xs font-medium mt-0.5 flex items-center gap-1">
+                            Online
+                        </p>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-1 shrink-0">
+<button aria-label="Ver Consumo" class="size-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</button>
+<button aria-label="Remover" class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-error hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Employee 2: Maria Oliveira -->
+<div class="flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group relative">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-success rounded-r-full"></div>
+<div class="relative shrink-0">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 bg-center bg-cover border border-slate-100 dark:border-slate-600" data-alt="Portrait of employee Maria Oliveira professional look" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCbrkpwfl8ZssWmgb-FRZ67eISV57n2-M_xKfkWZ1JeINGM3A0Hurq03LOQ0RrPUnBXEDrVBdaRMPsAjY7IGzETvKTe1gXWBU0zpnOpgCgyUSAnNGoK8KVcec_UilmkouSDqkErhQ0v8cf1b___iELFhnrHlUsGIyllCV1R8KrVTS6hL2nQ13cg9Q5nxsLNKwsiRxnT2GW8VdmCdwkykd95o1spiVxEAJvXOJ-v5rx1GDgCeKhSvT3gChOQVp2_CBad4PiCVmg1CN8');">
+</div>
+<span class="absolute bottom-0 right-0 size-2.5 bg-success rounded-full border-2 border-white dark:border-[#1c2a36]"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate">Maria Oliveira</p>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300">Gerente</span>
+</div>
+<p class="text-success text-xs font-medium mt-0.5">Online</p>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="size-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</button>
+<button class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-error hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Employee 3: Lucas Ribeiro -->
+<div class="flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group relative">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-success rounded-r-full"></div>
+<div class="relative shrink-0">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 bg-center bg-cover border border-slate-100 dark:border-slate-600" data-alt="Portrait of employee Lucas Ribeiro kitchen staff" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB1Ii8PgWaIvInfx8pFFpRcSb_kPDOL0hu54938aHWHtS48mNtGVDh3Idw6frGjRyjLKDrqObH7a-x3zjAVbym-WXymjMGeQoBr3Si5Hay5ZC1iHWWpSJT0JlapPhSalXdWdxdGNti48qlpdJKqMUuqBZfqrw92zKI6ezPOGjLGVrg81JCXaLwGBPA-Gi3i7bEqXw7vuUeZLpBZlL3IdlQRxBsGxpnu2B-pJVM_L3fBuQP9mrobB8cSsr2F58lfCxJxRaHSWkEJOSQ');">
+</div>
+<span class="absolute bottom-0 right-0 size-2.5 bg-success rounded-full border-2 border-white dark:border-[#1c2a36]"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2">
+<p class="text-slate-900 dark:text-white text-sm font-semibold truncate">Lucas Ribeiro</p>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300">Cozinha</span>
+</div>
+<p class="text-success text-xs font-medium mt-0.5">Online</p>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="size-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+</button>
+<button class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-error hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer of card (optional summary or pagination) -->
+<div class="bg-slate-50 dark:bg-[#15202b] px-5 py-3 border-t border-slate-100 dark:border-slate-700 flex justify-center">
+<span class="text-xs text-slate-400 font-medium cursor-pointer hover:text-primary transition-colors">Ver todos os funcionários</span>
+</div>
+</div>
+</main>
+<!-- Modal Overlay -->
+<div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog">
+<!-- Backdrop -->
+<div aria-hidden="true" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity"></div>
+<!-- Modal Panel -->
+<div class="relative w-full max-w-sm transform overflow-hidden rounded-xl bg-white dark:bg-[#1c2a36] shadow-2xl transition-all border border-slate-200 dark:border-slate-700">
+<!-- Modal Header -->
+<div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 px-5 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div>
+<h3 class="text-base font-bold text-slate-900 dark:text-white" id="modal-title">Consumo</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400">João Silva (Garçom)</p>
+</div>
+</div>
+<button class="rounded-md bg-white dark:bg-[#1c2a36] text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span class="sr-only">Fechar</span>
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Body: Item List -->
+<div class="px-5 py-4">
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-100 dark:bg-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">2x</span>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Coca-Cola Lata</span>
+<span class="text-[10px] text-slate-400">Bebidas</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">R$ 10,00</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-100 dark:bg-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">1x</span>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Pastel de Carne</span>
+<span class="text-[10px] text-slate-400">Salgados</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">R$ 15,00</span>
+</div>
+</div>
+<!-- Decorative dash line -->
+<div class="border-t border-dashed border-slate-200 dark:border-slate-600 my-2"></div>
+<!-- Total Row -->
+<div class="flex items-center justify-between pt-1">
+<span class="text-sm font-semibold text-slate-500 dark:text-slate-400">Total a pagar</span>
+<span class="text-lg font-bold text-slate-900 dark:text-white">R$ 25,00</span>
+</div>
+</div>
+</div>
+<!-- Modal Footer Buttons -->
+<div class="bg-slate-50 dark:bg-[#15202b] px-5 py-4 flex flex-col gap-3 border-t border-slate-100 dark:border-slate-700">
+<button class="inline-flex w-full items-center justify-center rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors" type="button">
+                    Adicionar Item
+                </button>
+<button class="inline-flex w-full justify-center rounded-lg bg-white dark:bg-slate-700 px-3 py-2.5 text-sm font-semibold text-slate-900 dark:text-white shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors" type="button">
+                    Fechar Conta
+                </button>
+</div>
+</div>
+</div>
+</body></html>

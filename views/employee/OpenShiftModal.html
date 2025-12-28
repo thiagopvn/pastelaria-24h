@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Abertura de Turno</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "hsl(207, 90%, 54%)",
+                        "primary-foreground": "hsl(210, 40%, 98%)",
+                        "background-light": "hsl(240, 5%, 96%)",
+                        "background-dark": "hsl(222.2, 84%, 4.9%)", // Zinc 950 essentially
+                        "surface-dark": "hsl(222.2, 84%, 4.9%)",
+                        "card-dark": "hsl(240, 10%, 3.9%)",
+                        "input-dark": "hsl(240, 3.7%, 15.9%)",
+                        "border-dark": "hsl(240, 3.7%, 15.9%)",
+                        "success": "hsl(142, 76%, 36%)",
+                        "danger": "hsl(0, 84.2%, 60.2%)",
+                        "warning": "hsl(38, 92%, 50%)",
+                        "muted-foreground": "hsl(215.4, 16.3%, 56.9%)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    borderRadius: {
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b4954;
+            border-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-black/50 backdrop-blur-sm flex justify-center items-end sm:items-center min-h-screen p-0 sm:p-4">
+<!-- Modal Container -->
+<div class="relative w-full max-w-md bg-background-light dark:bg-card-dark rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
+<!-- Header / Handle -->
+<div class="flex-none pt-3 pb-2 px-6 border-b border-gray-200 dark:border-border-dark bg-background-light dark:bg-card-dark z-10">
+<!-- Mobile Handle -->
+<div class="flex justify-center sm:hidden mb-4">
+<div class="h-1.5 w-12 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Abrir Novo Turno</h2>
+<p class="text-sm text-gray-500 dark:text-muted-foreground mt-0.5">Confira os valores antes de iniciar.</p>
+</div>
+<button class="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Stats Grid (ReadOnly) -->
+<section>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">history</span>
+                    Valores Esperados (Turno Anterior)
+                </h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-1 rounded-xl p-4 bg-white dark:bg-input-dark border border-gray-200 dark:border-border-dark shadow-sm">
+<span class="text-xs font-medium text-gray-500 dark:text-muted-foreground">Caixa Esperado</span>
+<div class="flex items-baseline gap-1">
+<span class="text-xs text-gray-400 font-mono">R$</span>
+<span class="text-xl font-bold text-gray-900 dark:text-white tracking-tight font-mono">450,00</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 rounded-xl p-4 bg-white dark:bg-input-dark border border-gray-200 dark:border-border-dark shadow-sm">
+<span class="text-xs font-medium text-gray-500 dark:text-muted-foreground">Moedas Esperadas</span>
+<div class="flex items-baseline gap-1">
+<span class="text-xs text-gray-400 font-mono">R$</span>
+<span class="text-xl font-bold text-gray-900 dark:text-white tracking-tight font-mono">52,50</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Inputs Section -->
+<section class="space-y-4">
+<h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">edit_square</span>
+                    Contagem Atual
+                </h3>
+<!-- Input 1: Caixa -->
+<div class="relative group">
+<label class="absolute -top-2 left-3 bg-background-light dark:bg-card-dark px-1 text-xs font-medium text-primary" for="cash-input">
+                        Caixa Inicial (R$)
+                    </label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 font-mono">R$</span>
+<input class="block w-full rounded-lg border-gray-300 dark:border-border-dark bg-white dark:bg-input-dark p-3.5 pl-10 text-base font-mono text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary dark:focus:border-primary dark:focus:ring-primary transition-all shadow-sm" id="cash-input" placeholder="0,00" type="number"/>
+</div>
+</div>
+<!-- Input 2: Moedas -->
+<div class="relative group">
+<label class="absolute -top-2 left-3 bg-background-light dark:bg-card-dark px-1 text-xs font-medium text-primary" for="coins-input">
+                        Moedas Iniciais (R$)
+                    </label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 font-mono">R$</span>
+<input class="block w-full rounded-lg border-gray-300 dark:border-border-dark bg-white dark:bg-input-dark p-3.5 pl-10 text-base font-mono text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary dark:focus:border-primary dark:focus:ring-primary transition-all shadow-sm" id="coins-input" placeholder="0,00" type="number"/>
+</div>
+</div>
+</section>
+<!-- Divergence Alert -->
+<div class="rounded-lg border border-danger/20 bg-danger/5 p-4 flex items-start gap-3">
+<div class="p-1 bg-danger/10 rounded-full text-danger shrink-0">
+<span class="material-symbols-outlined text-lg leading-none">warning</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-medium text-danger">Divergência na Abertura</p>
+<p class="text-xs text-danger/80 mt-1">O valor contado é menor que o esperado.</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-danger font-mono">- R$ 12,50</p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="flex-none p-6 border-t border-gray-200 dark:border-border-dark bg-background-light dark:bg-card-dark pb-8 sm:pb-6">
+<div class="flex gap-3">
+<button class="flex-1 h-12 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600">
+                    Cancelar
+                </button>
+<button class="flex-[2] h-12 rounded-lg bg-primary text-primary-foreground font-semibold shadow hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+                    Abrir Turno
+                </button>
+</div>
+</div>
+</div>
+</body></html>
