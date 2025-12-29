@@ -427,7 +427,7 @@ const AdminController = {
 
     async loadDashboardData() {
         try {
-            const { subscribeToDashboardStats, subscribeToAllActiveShifts } = await import('./js/firebase-config.js');
+            const { subscribeToDashboardStats, subscribeToAllActiveShifts } = await import('/js/firebase-config.js');
 
             // Subscribe to stats
             const statsUnsub = subscribeToDashboardStats((stats) => {

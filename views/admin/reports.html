@@ -305,7 +305,7 @@ const ReportsController = {
 
     async loadSettings() {
         try {
-            const { getSettings } = await import('./js/firebase-config.js');
+            const { getSettings } = await import('/js/firebase-config.js');
             const settings = await getSettings();
             if (settings) {
                 this.settings = { ...this.settings, ...settings };
@@ -323,7 +323,7 @@ const ReportsController = {
         this.settings.transportAllowance = parseFloat(document.getElementById('settings-transport-allowance').value) || 10;
 
         try {
-            const { updateSettings } = await import('./js/firebase-config.js');
+            const { updateSettings } = await import('/js/firebase-config.js');
             await updateSettings(this.settings);
             App.showToast('Configuracoes salvas!', 'success');
             this.closeModal('settings-modal');
@@ -336,7 +336,7 @@ const ReportsController = {
 
     async loadUsers() {
         try {
-            const { subscribeToUsers } = await import('./js/firebase-config.js');
+            const { subscribeToUsers } = await import('/js/firebase-config.js');
 
             const unsub = subscribeToUsers((users) => {
                 this.users = users.filter(u => u.role === 'staff' || u.role === 'admin');
@@ -356,7 +356,7 @@ const ReportsController = {
         btn.innerHTML = '<span class="spinner"></span> Carregando...';
 
         try {
-            const { getShiftHistory } = await import('./js/firebase-config.js');
+            const { getShiftHistory } = await import('/js/firebase-config.js');
 
             const weekEnd = new Date(this.currentWeekStart);
             weekEnd.setDate(weekEnd.getDate() + 7);

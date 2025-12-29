@@ -266,7 +266,7 @@ const UsersController = {
 
     async loadUsers() {
         try {
-            const { subscribeToUsers } = await import('./js/firebase-config.js');
+            const { subscribeToUsers } = await import('/js/firebase-config.js');
 
             const unsub = subscribeToUsers((users) => {
                 this.users = users;
@@ -416,7 +416,7 @@ const UsersController = {
         submitBtn.innerHTML = '<span class="spinner"></span>';
 
         try {
-            const { createNewUser, updateUser } = await import('./js/firebase-config.js');
+            const { createNewUser, updateUser } = await import('/js/firebase-config.js');
 
             if (this.editingUserId) {
                 await updateUser(this.editingUserId, { name, role, transport });
@@ -446,7 +446,7 @@ const UsersController = {
         deleteBtn.innerHTML = '<span class="spinner"></span>';
 
         try {
-            const { deleteUser } = await import('./js/firebase-config.js');
+            const { deleteUser } = await import('/js/firebase-config.js');
             await deleteUser(userId);
 
             App.showToast('Usuario excluido!', 'success');

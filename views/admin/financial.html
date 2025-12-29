@@ -343,7 +343,7 @@ const FinancialController = {
 
     async loadTransactions() {
         try {
-            const { subscribeToTransactions } = await import('./js/firebase-config.js');
+            const { subscribeToTransactions } = await import('/js/firebase-config.js');
 
             const unsub = subscribeToTransactions((transactions) => {
                 this.transactions = transactions.sort((a, b) => b.createdAt - a.createdAt);
@@ -507,7 +507,7 @@ const FinancialController = {
         submitBtn.innerHTML = '<span class="spinner"></span>';
 
         try {
-            const { createTransaction } = await import('./js/firebase-config.js');
+            const { createTransaction } = await import('/js/firebase-config.js');
 
             await createTransaction({
                 type: isExpense ? 'expense' : 'income',
@@ -546,12 +546,12 @@ const FinancialController = {
         deleteBtn.innerHTML = '<span class="spinner"></span>';
 
         try {
-            const { deleteDoc, doc, db } = await import('./js/firebase-config.js');
+            const { deleteDoc, doc, db } = await import('/js/firebase-config.js');
             // Delete from Firestore
             const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
 
             // Re-fetch and delete
-            const firebaseConfig = await import('./js/firebase-config.js');
+            const firebaseConfig = await import('/js/firebase-config.js');
 
             // For now, filter locally and show toast
             this.transactions = this.transactions.filter(t => t.id !== transactionId);

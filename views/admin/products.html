@@ -296,7 +296,7 @@ const ProductsController = {
 
     async loadProducts() {
         try {
-            const { subscribeToProducts } = await import('./js/firebase-config.js');
+            const { subscribeToProducts } = await import('/js/firebase-config.js');
 
             const unsub = subscribeToProducts((products) => {
                 this.products = products;
@@ -423,7 +423,7 @@ const ProductsController = {
         submitBtn.innerHTML = '<span class="spinner"></span>';
 
         try {
-            const { createProduct, updateProduct } = await import('./js/firebase-config.js');
+            const { createProduct, updateProduct } = await import('/js/firebase-config.js');
 
             const productData = { name, category, price, description, available };
 
@@ -455,7 +455,7 @@ const ProductsController = {
         deleteBtn.innerHTML = '<span class="spinner"></span>';
 
         try {
-            const { deleteProduct } = await import('./js/firebase-config.js');
+            const { deleteProduct } = await import('/js/firebase-config.js');
             await deleteProduct(productId);
 
             App.showToast('Produto excluido!', 'success');
