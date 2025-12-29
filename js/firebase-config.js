@@ -432,19 +432,54 @@ export async function openShift(userId, userName, initialCash, initialCoins = 0)
  */
 export async function closeShift(shiftId, userId, closingData) {
     try {
-        // Build closingData object first
+        // Build complete closingData object with all fields
         const closingDataObj = {
-            finalCash: parseFloat(closingData.finalCash) || 0,
+            // Legacy field for compatibility
+            finalCash: parseFloat(closingData.totalCashInformed) || parseFloat(closingData.finalCash) || 0,
             notes: closingData.notes || '',
-            closedAt: Date.now()
+            closedAt: closingData.closedAt || Date.now(),
+
+            // Cash values
+            cashNotes: closingData.cashNotes || 0,
+            cashCoins: closingData.cashCoins || 0,
+            envelopeNotes: closingData.envelopeNotes || 0,
+            envelopeCoins: closingData.envelopeCoins || 0,
+            remainingNotes: closingData.remainingNotes || 0,
+            remainingCoins: closingData.remainingCoins || 0,
+            totalCashInformed: closingData.totalCashInformed || 0,
+
+            // Card machine values - CUMULATIVE (what the machine shows)
+            stone_dc_cumulative: closingData.stone_dc_cumulative || 0,
+            stone_voucher_cumulative: closingData.stone_voucher_cumulative || 0,
+            pagbank_cumulative: closingData.pagbank_cumulative || 0,
+            pix_cumulative: closingData.pix_cumulative || 0,
+
+            // Card machine values - REAL (calculated sales for this shift)
+            stone_dc_real: closingData.stone_dc_real || 0,
+            stone_voucher_real: closingData.stone_voucher_real || 0,
+            pagbank_real: closingData.pagbank_real || 0,
+            pix_real: closingData.pix_real || 0,
+
+            // Calculation audit trail
+            cardCalculations: closingData.cardCalculations || null,
+            previousShiftValues: closingData.previousShiftValues || null,
+
+            // Midnight crossing data
+            crossesMidnight: closingData.crossesMidnight || false,
+            midnightValues: closingData.midnightValues || null,
+
+            // Totals
+            totalCardsReal: closingData.totalCardsReal || 0,
+            totalInformed: closingData.totalInformed || 0,
+            divergenceReason: closingData.divergenceReason || ''
         };
 
-        // Calculate divergence before building updates
+        // Calculate expected cash and divergence
         const shiftSnapshot = await get(ref(rtdb, `shifts/${shiftId}`));
         if (shiftSnapshot.exists()) {
             const shift = shiftSnapshot.val();
             const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
-            const divergence = closingDataObj.finalCash - expectedCash;
+            const divergence = (closingData.totalCashInformed || closingDataObj.finalCash) - expectedCash;
             closingDataObj.expectedCash = expectedCash;
             closingDataObj.divergence = divergence;
         }
@@ -1161,6 +1196,210 @@ export async function getPreviousShiftData(userId) {
         console.error('Error getting previous shift:', error);
         return { exists: false, expectedCash: 0, expectedCoins: 0 };
     }
+}
+
+/**
+ * Get last closed shift's card machine values for calculating real sales
+ * This handles the midnight reset issue with card machines
+ * @param {number} currentShiftStartTime - Start time of current shift
+ * @returns {Object} Previous accumulated values for each payment method
+ */
+export async function getLastClosedShiftCardValues(currentShiftStartTime) {
+    try {
+        // Get today's date at midnight for comparison
+        const shiftStartDate = new Date(currentShiftStartTime);
+        const todayMidnight = new Date(shiftStartDate);
+        todayMidnight.setHours(0, 0, 0, 0);
+
+        // Query the last closed shift
+        const shiftsQuery = query(
+            collection(db, COLLECTIONS.SHIFTS),
+            where('status', '==', 'closed'),
+            orderBy('endTime', 'desc'),
+            limit(1)
+        );
+
+        const snapshot = await getDocs(shiftsQuery);
+
+        if (snapshot.empty) {
+            console.log('No previous closed shift found');
+            return {
+                exists: false,
+                sameDay: false,
+                stone_dc_cumulative: 0,
+                stone_voucher_cumulative: 0,
+                pagbank_cumulative: 0,
+                pix_cumulative: 0
+            };
+        }
+
+        const lastShift = snapshot.docs[0].data();
+        const lastShiftEndTime = lastShift.endTime || lastShift.closingData?.closedAt;
+
+        if (!lastShiftEndTime) {
+            return {
+                exists: true,
+                sameDay: false,
+                stone_dc_cumulative: 0,
+                stone_voucher_cumulative: 0,
+                pagbank_cumulative: 0,
+                pix_cumulative: 0
+            };
+        }
+
+        // Check if last shift was closed on the same fiscal day
+        // Fiscal day resets at midnight, so we compare dates
+        const lastShiftDate = new Date(lastShiftEndTime);
+        const lastShiftMidnight = new Date(lastShiftDate);
+        lastShiftMidnight.setHours(0, 0, 0, 0);
+
+        // Determine if this is the same "fiscal day" for the card machines
+        // Card machines reset at midnight, so if the current shift started AFTER midnight
+        // and the previous shift ended BEFORE the same midnight, they share accumulated values
+        const currentShiftStartMidnight = new Date(currentShiftStartTime);
+        currentShiftStartMidnight.setHours(0, 0, 0, 0);
+
+        const sameDay = lastShiftMidnight.getTime() === currentShiftStartMidnight.getTime();
+
+        console.log('Last shift end:', new Date(lastShiftEndTime).toISOString());
+        console.log('Current shift start:', new Date(currentShiftStartTime).toISOString());
+        console.log('Same fiscal day:', sameDay);
+
+        return {
+            exists: true,
+            sameDay: sameDay,
+            lastShiftEndTime: lastShiftEndTime,
+            // Return the CUMULATIVE values from the last shift (not the real values)
+            // These represent what the machine showed at the end of that shift
+            stone_dc_cumulative: lastShift.closingData?.stone_dc_cumulative || 0,
+            stone_voucher_cumulative: lastShift.closingData?.stone_voucher_cumulative || 0,
+            pagbank_cumulative: lastShift.closingData?.pagbank_cumulative || 0,
+            pix_cumulative: lastShift.closingData?.pix_cumulative || 0
+        };
+    } catch (error) {
+        console.error('Error getting last shift card values:', error);
+        return {
+            exists: false,
+            sameDay: false,
+            stone_dc_cumulative: 0,
+            stone_voucher_cumulative: 0,
+            pagbank_cumulative: 0,
+            pix_cumulative: 0
+        };
+    }
+}
+
+/**
+ * Calculate real card sales for current shift
+ * Handles the midnight reset issue with card machines
+ * @param {Object} currentValues - Current values shown on card machines
+ * @param {Object} previousValues - Previous accumulated values from last shift
+ * @returns {Object} Calculated real sales for this shift
+ */
+export function calculateRealCardSales(currentValues, previousValues) {
+    const result = {
+        stone_dc_cumulative: currentValues.stone_dc || 0,
+        stone_dc_real: 0,
+        stone_voucher_cumulative: currentValues.stone_voucher || 0,
+        stone_voucher_real: 0,
+        pagbank_cumulative: currentValues.pagbank || 0,
+        pagbank_real: 0,
+        pix_cumulative: currentValues.pix || 0,
+        pix_real: 0,
+        calculations: {}
+    };
+
+    const methods = ['stone_dc', 'stone_voucher', 'pagbank', 'pix'];
+
+    methods.forEach(method => {
+        const current = currentValues[method] || 0;
+        const previous = previousValues[`${method}_cumulative`] || 0;
+
+        let realValue;
+        let calculationType;
+
+        if (!previousValues.exists || !previousValues.sameDay) {
+            // Scenario B: First shift of the day or machine reset
+            // The current value IS the real value for this shift
+            realValue = current;
+            calculationType = 'first_of_day';
+        } else if (current >= previous) {
+            // Scenario A: Same day, value increased normally
+            // Real = Current - Previous
+            realValue = current - previous;
+            calculationType = 'subtraction';
+        } else {
+            // Edge case: Current < Previous
+            // This could mean the machine was reset/changed, or it's a new day
+            // Treat current as the real value (assume reset happened)
+            realValue = current;
+            calculationType = 'reset_detected';
+        }
+
+        result[`${method}_real`] = realValue;
+        result.calculations[method] = {
+            current: current,
+            previous: previous,
+            real: realValue,
+            type: calculationType
+        };
+    });
+
+    console.log('Card sales calculation:', result.calculations);
+
+    return result;
+}
+
+/**
+ * Check if shift crosses midnight (for warning/special handling)
+ * @param {number} startTime - Shift start timestamp
+ * @returns {boolean} True if shift started before midnight and is still open after midnight
+ */
+export function checkIfShiftCrossesMidnight(startTime) {
+    const startDate = new Date(startTime);
+    const now = new Date();
+
+    const startDay = startDate.toDateString();
+    const currentDay = now.toDateString();
+
+    return startDay !== currentDay;
+}
+
+/**
+ * Get midnight crossing info for a shift
+ * @param {number} startTime - Shift start timestamp
+ * @returns {Object} Info about midnight crossing
+ */
+export function getMidnightCrossingInfo(startTime) {
+    const startDate = new Date(startTime);
+    const now = new Date();
+
+    const startDay = startDate.toDateString();
+    const currentDay = now.toDateString();
+
+    const crossesMidnight = startDay !== currentDay;
+
+    if (!crossesMidnight) {
+        return {
+            crossesMidnight: false,
+            startDate: startDay,
+            currentDate: currentDay
+        };
+    }
+
+    // Calculate the midnight timestamp
+    const midnightAfterStart = new Date(startDate);
+    midnightAfterStart.setDate(midnightAfterStart.getDate() + 1);
+    midnightAfterStart.setHours(0, 0, 0, 0);
+
+    return {
+        crossesMidnight: true,
+        startDate: startDay,
+        currentDate: currentDay,
+        midnightTimestamp: midnightAfterStart.getTime(),
+        hoursBeforeMidnight: (midnightAfterStart.getTime() - startDate.getTime()) / (1000 * 60 * 60),
+        hoursAfterMidnight: (now.getTime() - midnightAfterStart.getTime()) / (1000 * 60 * 60)
+    };
 }
 
 /**

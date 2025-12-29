@@ -44,10 +44,16 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Transacoes financeiras - admin apenas
+    // Transacoes financeiras - admin pode tudo, staff pode criar relacionadas a turnos
     match /transactions/{transactionId} {
       allow read: if isAuthenticated();
-      allow create, update, delete: if isAdmin();
+      // Staff pode criar transacoes de vendas relacionadas a fechamento de turno
+      allow create: if isAdmin() ||
+        (isStaff() &&
+         request.resource.data.type == 'income' &&
+         request.resource.data.category == 'vendas' &&
+         request.resource.data.shiftId != null);
+      allow update, delete: if isAdmin();
     }
 
     // Relatorios - apenas leitura para todos autenticados

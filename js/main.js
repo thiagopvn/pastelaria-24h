@@ -759,16 +759,25 @@ async function handleCloseShift(e) {
         return;
     }
 
-    showCashRegisterModal();
+    await showCashRegisterModal();
 }
 
-function showCashRegisterModal() {
+async function showCashRegisterModal() {
     const shift = AppState.activeShift;
     if (!shift) return;
 
     // Calculate expected values
     const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
     const totalSales = shift.totalSales || 0;
+
+    // Get last shift's card values for calculation
+    const { getLastClosedShiftCardValues, getMidnightCrossingInfo } = await import('./firebase-config.js');
+    const previousCardValues = await getLastClosedShiftCardValues(shift.startTime);
+    const midnightInfo = getMidnightCrossingInfo(shift.startTime);
+
+    // Store for later use
+    AppState.previousCardValues = previousCardValues;
+    AppState.midnightInfo = midnightInfo;
 
     // Create modal
     let modal = document.getElementById('cash-register-modal');
@@ -791,6 +800,40 @@ function showCashRegisterModal() {
     const startTime = new Date(shift.startTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     const shiftDate = new Date(shift.startTime).toLocaleDateString('pt-BR');
 
+    // Midnight crossing warning HTML
+    const midnightWarningHtml = midnightInfo.crossesMidnight ? `
+        <div class="card p-4 border-l-4 border-l-warning bg-warning/10 mb-4">
+            <h3 class="font-semibold mb-2 flex items-center gap-2 text-warning">
+                <span class="material-symbols-outlined">schedule</span>
+                Turno Cruzou Meia-Noite
+            </h3>
+            <p class="text-sm text-warning/80 mb-2">
+                Este turno iniciou em <strong>${midnightInfo.startDate}</strong> e esta sendo fechado em <strong>${midnightInfo.currentDate}</strong>.
+            </p>
+            <p class="text-xs text-muted">
+                As maquininhas de cartao zeram a meia-noite. Se voce fez vendas ANTES da meia-noite,
+                informe o valor que a maquininha mostrava as 23:59 no campo "Valor Pre-Meia-Noite".
+            </p>
+        </div>
+    ` : '';
+
+    // Previous values info HTML (only if same day and has previous values)
+    const previousValuesInfoHtml = previousCardValues.exists && previousCardValues.sameDay ? `
+        <div class="bg-blue-500/10 rounded-lg p-3 mb-3 text-sm">
+            <p class="font-medium text-blue-600 dark:text-blue-400 mb-1">
+                <span class="material-symbols-outlined text-sm align-middle">info</span>
+                Valores acumulados do turno anterior (mesmo dia)
+            </p>
+            <div class="grid grid-cols-2 gap-2 text-xs text-muted">
+                <span>Stone DC: ${formatCurrency(previousCardValues.stone_dc_cumulative)}</span>
+                <span>Stone Voucher: ${formatCurrency(previousCardValues.stone_voucher_cumulative)}</span>
+                <span>PagBank: ${formatCurrency(previousCardValues.pagbank_cumulative)}</span>
+                <span>PIX: ${formatCurrency(previousCardValues.pix_cumulative)}</span>
+            </div>
+            <p class="text-xs text-muted mt-1">O sistema calculara automaticamente: Venda Real = Valor Atual - Valor Anterior</p>
+        </div>
+    ` : '';
+
     modal.innerHTML = `
         <div class="min-h-screen flex flex-col">
             <!-- Header -->
@@ -807,6 +850,8 @@ function showCashRegisterModal() {
 
             <!-- Content -->
             <main class="flex-1 p-4 space-y-4 pb-32">
+                ${midnightWarningHtml}
+
                 <!-- Resumo do Turno -->
                 <div class="card p-4 bg-primary/10 border-primary/20">
                     <h3 class="font-semibold text-primary mb-3 flex items-center gap-2">
@@ -833,15 +878,15 @@ function showCashRegisterModal() {
                     </div>
                 </div>
 
-                <!-- Section 1: Total em Loja -->
+                <!-- Section 1: Total em Loja (Dinheiro) -->
                 <div class="card p-4 border-l-4 border-l-primary">
                     <h3 class="font-semibold mb-3 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">storefront</span>
-                        1. Total em Loja
+                        1. Total em Loja (Dinheiro)
                     </h3>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Cédulas (R$)</label>
+                            <label class="block text-sm font-medium mb-1">Cedulas (R$)</label>
                             <input type="number" id="cash-notes" step="0.01" min="0"
                                    class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
                                    placeholder="0,00" oninput="App.calculateCashRegister()">
@@ -863,7 +908,7 @@ function showCashRegisterModal() {
                     </h3>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Cédulas Env. (R$)</label>
+                            <label class="block text-sm font-medium mb-1">Cedulas Env. (R$)</label>
                             <input type="number" id="envelope-notes" step="0.01" min="0"
                                    class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
                                    placeholder="0,00" oninput="App.calculateCashRegister()">
@@ -885,7 +930,7 @@ function showCashRegisterModal() {
                     </h3>
                     <div class="bg-white dark:bg-background-dark rounded-lg p-3 border">
                         <div class="flex justify-between text-sm mb-2">
-                            <span>Cédulas: <strong id="remaining-notes">R$ 0,00</strong></span>
+                            <span>Cedulas: <strong id="remaining-notes">R$ 0,00</strong></span>
                             <span>Moedas: <strong id="remaining-coins">R$ 0,00</strong></span>
                         </div>
                         <div class="border-t pt-2 flex justify-between items-center">
@@ -895,34 +940,121 @@ function showCashRegisterModal() {
                     </div>
                 </div>
 
-                <!-- Divergência (aparece se houver) -->
-                <div id="divergence-alert" class="card p-4 border-l-4 border-l-danger bg-danger/5 hidden">
-                    <h3 class="font-semibold mb-2 flex items-center gap-2 text-danger">
-                        <span class="material-symbols-outlined">warning</span>
-                        Divergência Detectada
+                <!-- Section 4: Pagamentos em Cartao/Maquininha -->
+                <div class="card p-4 border-l-4 border-l-purple-500">
+                    <h3 class="font-semibold mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-purple-500">credit_card</span>
+                        4. Valores das Maquininhas
                     </h3>
-                    <p class="text-sm mb-3">Diferença: <strong id="divergence-value">R$ 0,00</strong></p>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Justificativa (obrigatória)</label>
-                        <textarea id="divergence-reason" rows="3"
-                                  class="w-full px-3 py-2 rounded-lg border bg-background-light dark:bg-background-dark resize-none"
-                                  placeholder="Descreva o motivo da diferença..."></textarea>
+                    <p class="text-xs text-muted mb-3">Informe o valor que aparece no VISOR de cada maquininha agora.</p>
+                    ${previousValuesInfoHtml}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Stone DC (R$)</label>
+                            <input type="number" id="card-stone-dc" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                            <p id="stone-dc-real" class="text-xs text-success mt-1 hidden"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Stone Voucher (R$)</label>
+                            <input type="number" id="card-stone-voucher" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                            <p id="stone-voucher-real" class="text-xs text-success mt-1 hidden"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PagBank (R$)</label>
+                            <input type="number" id="card-pagbank" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                            <p id="pagbank-real" class="text-xs text-success mt-1 hidden"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PIX (R$)</label>
+                            <input type="number" id="card-pix" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                            <p id="pix-real" class="text-xs text-success mt-1 hidden"></p>
+                        </div>
+                    </div>
+                    <!-- Resumo das vendas reais calculadas -->
+                    <div id="card-sales-summary" class="mt-3 p-3 bg-purple-500/10 rounded-lg hidden">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-purple-600 dark:text-purple-400">Total Cartoes (Vendas Reais)</span>
+                            <span id="total-cards-real" class="text-lg font-bold text-purple-600 dark:text-purple-400">R$ 0,00</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Observações -->
+                ${midnightInfo.crossesMidnight ? `
+                <!-- Section 5: Valores Pre-Meia-Noite (apenas se cruzou meia-noite) -->
+                <div class="card p-4 border-l-4 border-l-orange-500 bg-orange-500/5">
+                    <h3 class="font-semibold mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-500">nights_stay</span>
+                        5. Vendas ANTES da Meia-Noite (Opcional)
+                    </h3>
+                    <p class="text-xs text-muted mb-3">
+                        Se voce anotou o valor das maquininhas as 23:59, informe aqui.
+                        Isso ajuda a registrar corretamente as vendas de cada dia fiscal.
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Stone DC (23:59)</label>
+                            <input type="number" id="midnight-stone-dc" step="0.01" min="0"
+                                   class="w-full h-10 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-base font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Stone Voucher (23:59)</label>
+                            <input type="number" id="midnight-stone-voucher" step="0.01" min="0"
+                                   class="w-full h-10 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-base font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PagBank (23:59)</label>
+                            <input type="number" id="midnight-pagbank" step="0.01" min="0"
+                                   class="w-full h-10 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-base font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">PIX (23:59)</label>
+                            <input type="number" id="midnight-pix" step="0.01" min="0"
+                                   class="w-full h-10 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-base font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Divergencia (aparece se houver) -->
+                <div id="divergence-alert" class="card p-4 border-l-4 border-l-danger bg-danger/5 hidden">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2 text-danger">
+                        <span class="material-symbols-outlined">warning</span>
+                        Divergencia Detectada
+                    </h3>
+                    <p class="text-sm mb-3">Diferenca: <strong id="divergence-value">R$ 0,00</strong></p>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Justificativa (obrigatoria)</label>
+                        <textarea id="divergence-reason" rows="3"
+                                  class="w-full px-3 py-2 rounded-lg border bg-background-light dark:bg-background-dark resize-none"
+                                  placeholder="Descreva o motivo da diferenca..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Observacoes -->
                 <div class="card p-4">
-                    <label class="block text-sm font-medium mb-1">Observações (opcional)</label>
+                    <label class="block text-sm font-medium mb-1">Observacoes (opcional)</label>
                     <textarea id="shift-notes" rows="2"
                               class="w-full px-3 py-2 rounded-lg border bg-background-light dark:bg-background-dark resize-none"
-                              placeholder="Anotações sobre o turno..."></textarea>
+                              placeholder="Anotacoes sobre o turno..."></textarea>
                 </div>
             </main>
 
             <!-- Footer -->
             <div class="fixed bottom-0 left-0 right-0 p-4 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark">
                 <div class="flex justify-between items-center mb-3">
-                    <span class="text-muted">Total Informado</span>
+                    <span class="text-muted">Total Geral</span>
                     <span id="total-informed" class="text-xl font-bold">R$ 0,00</span>
                 </div>
                 <button onclick="App.confirmCloseShift()" class="btn btn-primary w-full h-12 text-lg font-semibold flex items-center justify-center gap-2">
@@ -946,52 +1078,176 @@ function closeCashRegisterModal() {
     if (overlay) overlay.classList.remove('active');
 }
 
-function calculateCashRegister() {
+async function calculateCashRegister() {
     const cashNotes = parseFloat(document.getElementById('cash-notes')?.value) || 0;
     const cashCoins = parseFloat(document.getElementById('cash-coins')?.value) || 0;
     const envelopeNotes = parseFloat(document.getElementById('envelope-notes')?.value) || 0;
     const envelopeCoins = parseFloat(document.getElementById('envelope-coins')?.value) || 0;
 
+    // Card machine values
+    const stoneDc = parseFloat(document.getElementById('card-stone-dc')?.value) || 0;
+    const stoneVoucher = parseFloat(document.getElementById('card-stone-voucher')?.value) || 0;
+    const pagbank = parseFloat(document.getElementById('card-pagbank')?.value) || 0;
+    const pix = parseFloat(document.getElementById('card-pix')?.value) || 0;
+
+    // Midnight values (if shift crosses midnight)
+    const midnightStoneDc = parseFloat(document.getElementById('midnight-stone-dc')?.value) || 0;
+    const midnightStoneVoucher = parseFloat(document.getElementById('midnight-stone-voucher')?.value) || 0;
+    const midnightPagbank = parseFloat(document.getElementById('midnight-pagbank')?.value) || 0;
+    const midnightPix = parseFloat(document.getElementById('midnight-pix')?.value) || 0;
+
     const remainingNotes = cashNotes - envelopeNotes;
     const remainingCoins = cashCoins - envelopeCoins;
-    const totalInformed = cashNotes + cashCoins;
-    const remainingTotal = remainingNotes + remainingCoins;
 
-    // Update displays
+    // Update cash displays
     document.getElementById('remaining-notes').textContent = formatCurrency(Math.max(0, remainingNotes));
     document.getElementById('remaining-coins').textContent = formatCurrency(Math.max(0, remainingCoins));
-    document.getElementById('remaining-total').textContent = formatCurrency(Math.max(0, remainingTotal));
+    document.getElementById('remaining-total').textContent = formatCurrency(Math.max(0, remainingNotes + remainingCoins));
+
+    // Calculate real card sales using the function from firebase-config
+    const shift = AppState.activeShift;
+    if (!shift) return;
+
+    const { calculateRealCardSales } = await import('./firebase-config.js');
+
+    const currentCardValues = {
+        stone_dc: stoneDc,
+        stone_voucher: stoneVoucher,
+        pagbank: pagbank,
+        pix: pix
+    };
+
+    const previousCardValues = AppState.previousCardValues || {
+        exists: false,
+        sameDay: false,
+        stone_dc_cumulative: 0,
+        stone_voucher_cumulative: 0,
+        pagbank_cumulative: 0,
+        pix_cumulative: 0
+    };
+
+    const cardCalculations = calculateRealCardSales(currentCardValues, previousCardValues);
+
+    // Update card real value displays
+    const methods = [
+        { id: 'stone-dc', key: 'stone_dc' },
+        { id: 'stone-voucher', key: 'stone_voucher' },
+        { id: 'pagbank', key: 'pagbank' },
+        { id: 'pix', key: 'pix' }
+    ];
+
+    let totalCardsReal = 0;
+    let hasCardValues = false;
+
+    methods.forEach(({ id, key }) => {
+        const realEl = document.getElementById(`${id}-real`);
+        const cumulative = currentCardValues[key] || 0;
+        const real = cardCalculations[`${key}_real`] || 0;
+        const calcInfo = cardCalculations.calculations[key];
+
+        if (cumulative > 0) {
+            hasCardValues = true;
+            totalCardsReal += real;
+
+            if (realEl) {
+                realEl.classList.remove('hidden');
+                if (calcInfo?.type === 'subtraction') {
+                    realEl.textContent = `Venda real: ${formatCurrency(real)} (${formatCurrency(cumulative)} - ${formatCurrency(calcInfo.previous)})`;
+                } else if (calcInfo?.type === 'first_of_day') {
+                    realEl.textContent = `Venda real: ${formatCurrency(real)} (primeiro turno do dia)`;
+                } else if (calcInfo?.type === 'reset_detected') {
+                    realEl.textContent = `Venda real: ${formatCurrency(real)} (reset detectado)`;
+                } else {
+                    realEl.textContent = `Venda real: ${formatCurrency(real)}`;
+                }
+            }
+        } else if (realEl) {
+            realEl.classList.add('hidden');
+        }
+    });
+
+    // Update card sales summary
+    const cardSummary = document.getElementById('card-sales-summary');
+    const totalCardsEl = document.getElementById('total-cards-real');
+    if (hasCardValues) {
+        cardSummary?.classList.remove('hidden');
+        if (totalCardsEl) totalCardsEl.textContent = formatCurrency(totalCardsReal);
+    } else {
+        cardSummary?.classList.add('hidden');
+    }
+
+    // Calculate total informed (cash + cards)
+    const totalCashInformed = cashNotes + cashCoins;
+    const totalInformed = totalCashInformed + totalCardsReal;
     document.getElementById('total-informed').textContent = formatCurrency(totalInformed);
 
-    // Calculate divergence
-    const shift = AppState.activeShift;
-    if (shift) {
-        const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
-        const divergence = totalInformed - expectedCash;
+    // Calculate divergence (comparing total informed with expected)
+    const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
+    const divergence = totalCashInformed - expectedCash;
 
-        const divergenceAlert = document.getElementById('divergence-alert');
-        const divergenceValue = document.getElementById('divergence-value');
+    const divergenceAlert = document.getElementById('divergence-alert');
+    const divergenceValue = document.getElementById('divergence-value');
 
-        if (Math.abs(divergence) > 0.5) {
-            divergenceAlert.classList.remove('hidden');
+    if (Math.abs(divergence) > 0.5) {
+        divergenceAlert?.classList.remove('hidden');
+        if (divergenceValue) {
             divergenceValue.textContent = (divergence > 0 ? '+' : '') + formatCurrency(divergence);
             divergenceValue.className = divergence > 0 ? 'text-success font-bold' : 'text-danger font-bold';
-        } else {
-            divergenceAlert.classList.add('hidden');
         }
-
-        AppState.closingData = {
-            cashNotes,
-            cashCoins,
-            envelopeNotes,
-            envelopeCoins,
-            remainingNotes: Math.max(0, remainingNotes),
-            remainingCoins: Math.max(0, remainingCoins),
-            totalInformed,
-            expectedCash,
-            divergence
-        };
+    } else {
+        divergenceAlert?.classList.add('hidden');
     }
+
+    // Store all closing data for submission
+    AppState.closingData = {
+        // Cash
+        cashNotes,
+        cashCoins,
+        envelopeNotes,
+        envelopeCoins,
+        remainingNotes: Math.max(0, remainingNotes),
+        remainingCoins: Math.max(0, remainingCoins),
+        totalCashInformed: totalCashInformed,
+
+        // Card machine values - CUMULATIVE (what the machine shows)
+        stone_dc_cumulative: stoneDc,
+        stone_voucher_cumulative: stoneVoucher,
+        pagbank_cumulative: pagbank,
+        pix_cumulative: pix,
+
+        // Card machine values - REAL (calculated sales for this shift)
+        stone_dc_real: cardCalculations.stone_dc_real,
+        stone_voucher_real: cardCalculations.stone_voucher_real,
+        pagbank_real: cardCalculations.pagbank_real,
+        pix_real: cardCalculations.pix_real,
+
+        // Calculation details for audit
+        cardCalculations: cardCalculations.calculations,
+
+        // Midnight values (if applicable)
+        midnightValues: AppState.midnightInfo?.crossesMidnight ? {
+            stone_dc: midnightStoneDc,
+            stone_voucher: midnightStoneVoucher,
+            pagbank: midnightPagbank,
+            pix: midnightPix
+        } : null,
+
+        // Totals
+        totalCardsReal,
+        totalInformed,
+        expectedCash,
+        divergence,
+
+        // Metadata
+        crossesMidnight: AppState.midnightInfo?.crossesMidnight || false,
+        previousShiftValues: previousCardValues.exists ? {
+            sameDay: previousCardValues.sameDay,
+            stone_dc: previousCardValues.stone_dc_cumulative,
+            stone_voucher: previousCardValues.stone_voucher_cumulative,
+            pagbank: previousCardValues.pagbank_cumulative,
+            pix: previousCardValues.pix_cumulative
+        } : null
+    };
 }
 
 async function confirmCloseShift() {
@@ -1000,14 +1256,15 @@ async function confirmCloseShift() {
         return;
     }
 
-    const { divergence, envelopeNotes, envelopeCoins } = AppState.closingData;
+    const closingData = AppState.closingData;
+    const { divergence, envelopeNotes, envelopeCoins, totalCardsReal } = closingData;
     const envelopeTotal = (envelopeNotes || 0) + (envelopeCoins || 0);
     const divergenceReason = document.getElementById('divergence-reason')?.value || '';
     const notes = document.getElementById('shift-notes')?.value || '';
 
     // Require justification for divergence > R$0.50
     if (Math.abs(divergence) > 0.5 && !divergenceReason.trim()) {
-        showToast('Informe a justificativa da divergência', 'warning');
+        showToast('Informe a justificativa da divergencia', 'warning');
         document.getElementById('divergence-reason')?.focus();
         return;
     }
@@ -1016,24 +1273,60 @@ async function confirmCloseShift() {
         showLoading();
         const { closeShift, createTransaction } = await import('./firebase-config.js');
 
+        // Build complete closing data with card values
+        const completeClosingData = {
+            // Cash values
+            cashNotes: closingData.cashNotes,
+            cashCoins: closingData.cashCoins,
+            envelopeNotes: closingData.envelopeNotes,
+            envelopeCoins: closingData.envelopeCoins,
+            remainingNotes: closingData.remainingNotes,
+            remainingCoins: closingData.remainingCoins,
+            totalCashInformed: closingData.totalCashInformed,
+
+            // Card machine values - CUMULATIVE (for next shift calculation)
+            stone_dc_cumulative: closingData.stone_dc_cumulative,
+            stone_voucher_cumulative: closingData.stone_voucher_cumulative,
+            pagbank_cumulative: closingData.pagbank_cumulative,
+            pix_cumulative: closingData.pix_cumulative,
+
+            // Card machine values - REAL (actual sales this shift)
+            stone_dc_real: closingData.stone_dc_real,
+            stone_voucher_real: closingData.stone_voucher_real,
+            pagbank_real: closingData.pagbank_real,
+            pix_real: closingData.pix_real,
+
+            // Calculation audit trail
+            cardCalculations: closingData.cardCalculations,
+            previousShiftValues: closingData.previousShiftValues,
+
+            // Midnight crossing data
+            crossesMidnight: closingData.crossesMidnight,
+            midnightValues: closingData.midnightValues,
+
+            // Totals
+            totalCardsReal: closingData.totalCardsReal,
+            totalInformed: closingData.totalInformed,
+            expectedCash: closingData.expectedCash,
+            divergence: closingData.divergence,
+            divergenceReason,
+            notes,
+            closedAt: Date.now()
+        };
+
         // Close the shift
         await closeShift(
             AppState.activeShift.id,
             AppState.currentUser.id,
-            {
-                ...AppState.closingData,
-                divergenceReason,
-                notes,
-                closedAt: Date.now()
-            }
+            completeClosingData
         );
+
+        const shiftDate = new Date(AppState.activeShift.startTime);
+        const formattedDate = shiftDate.toLocaleDateString('pt-BR');
+        const operatorName = AppState.currentUser?.name || 'Operador';
 
         // Register envelope value as financial entry (if > 0)
         if (envelopeTotal > 0) {
-            const shiftDate = new Date(AppState.activeShift.startTime);
-            const formattedDate = shiftDate.toLocaleDateString('pt-BR');
-            const operatorName = AppState.currentUser?.name || 'Operador';
-
             await createTransaction({
                 type: 'income',
                 category: 'vendas',
@@ -1052,6 +1345,35 @@ async function confirmCloseShift() {
             });
         }
 
+        // Register card sales as separate financial entries (if > 0)
+        const cardMethods = [
+            { key: 'stone_dc_real', name: 'Stone DC', paymentMethod: 'stone_dc' },
+            { key: 'stone_voucher_real', name: 'Stone Voucher', paymentMethod: 'stone_voucher' },
+            { key: 'pagbank_real', name: 'PagBank', paymentMethod: 'pagbank' },
+            { key: 'pix_real', name: 'PIX', paymentMethod: 'pix' }
+        ];
+
+        for (const { key, name, paymentMethod } of cardMethods) {
+            const amount = closingData[key] || 0;
+            if (amount > 0) {
+                await createTransaction({
+                    type: 'income',
+                    category: 'vendas',
+                    description: `${name} Turno ${formattedDate} - ${operatorName}`,
+                    amount: amount,
+                    paymentMethod: paymentMethod,
+                    shiftId: AppState.activeShift.id,
+                    operatorId: AppState.currentUser?.id,
+                    operatorName: operatorName,
+                    details: {
+                        cumulative: closingData[key.replace('_real', '_cumulative')],
+                        real: amount,
+                        calculationType: closingData.cardCalculations?.[key.replace('_real', '')]?.type
+                    }
+                });
+            }
+        }
+
         showToast('Turno encerrado com sucesso!', 'success');
         closeCashRegisterModal();
 
@@ -1063,6 +1385,8 @@ async function confirmCloseShift() {
         // Reset state
         AppState.activeShift = null;
         AppState.closingData = null;
+        AppState.previousCardValues = null;
+        AppState.midnightInfo = null;
         showNoShift();
 
     } catch (error) {
