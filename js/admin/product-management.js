@@ -260,7 +260,10 @@ async function loadProducts() {
     `;
 
     try {
-        const { subscribeToProducts } = await import('../firebase-config.js');
+        const { subscribeToProducts, syncProductsToRTDB } = await import('../firebase-config.js');
+
+        // Sync products to RTDB for real-time updates on employee side
+        syncProductsToRTDB().catch(err => console.warn('RTDB sync warning:', err));
 
         const unsubscribe = subscribeToProducts((products) => {
             ProductManagementState.products = products;

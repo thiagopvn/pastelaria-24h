@@ -116,8 +116,14 @@
         <!-- Collaborators Card -->
         <div class="card">
             <div class="p-4 border-b border-border-light dark:border-border-dark flex items-center justify-between">
-                <h3 class="font-semibold">Colaboradores no Turno</h3>
-                <span class="badge badge-success" id="active-collaborators-count">0 ativos</span>
+                <div class="flex items-center gap-2">
+                    <h3 class="font-semibold">Colaboradores no Turno</h3>
+                    <span class="badge badge-success" id="active-collaborators-count">0 ativos</span>
+                </div>
+                <button id="add-collaborator-btn" class="btn btn-sm btn-primary">
+                    <span class="material-symbols-outlined text-sm">person_add</span>
+                    Adicionar
+                </button>
             </div>
             <div id="collaborators-list" class="divide-y divide-border-light dark:divide-border-dark">
                 <!-- Empty State -->
@@ -126,7 +132,7 @@
                         <span class="material-symbols-outlined">group_off</span>
                     </div>
                     <h3>Nenhum colaborador</h3>
-                    <p>Nao ha colaboradores ativos no momento</p>
+                    <p>Adicione colaboradores ao turno</p>
                 </div>
             </div>
         </div>
@@ -492,6 +498,91 @@
     </div>
 </div>
 
+<!-- Add Collaborator Modal -->
+<div id="add-collaborator-modal-overlay" class="modal-overlay"></div>
+<div id="add-collaborator-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-xl font-bold">Adicionar Colaborador</h2>
+                <p class="text-sm text-muted">Adicione um funcionario ao turno</p>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="add-collaborator-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="add-collaborator-form" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium text-muted block mb-2">Funcionario</label>
+                <select id="collaborator-select" class="input" required>
+                    <option value="">Selecione um funcionario...</option>
+                </select>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="button" class="btn btn-secondary flex-1" data-modal-close="add-collaborator-modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary flex-[2]">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Adicionar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Collaborator Consume Modal -->
+<div id="collaborator-consume-modal-overlay" class="modal-overlay"></div>
+<div id="collaborator-consume-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
+    <div class="p-6">
+        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <img id="consume-collab-avatar" src="" alt="" class="w-12 h-12 rounded-full">
+                <div>
+                    <h2 id="consume-collab-name" class="text-xl font-bold">Colaborador</h2>
+                    <p id="consume-collab-role" class="text-sm text-muted">Funcionario</p>
+                </div>
+            </div>
+            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="collaborator-consume-modal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Consumption Form -->
+        <form id="collaborator-consume-form" class="mb-6">
+            <div class="grid grid-cols-3 gap-3">
+                <div class="col-span-2">
+                    <select id="consume-product" class="input" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="number" id="consume-quantity" class="input text-center" value="1" min="1">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-full mt-3">
+                <span class="material-symbols-outlined">add_shopping_cart</span>
+                Adicionar Consumo
+            </button>
+        </form>
+
+        <!-- Consumption List -->
+        <div class="bg-background-light dark:bg-background-dark rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold">Consumos</h3>
+                <span class="text-lg font-bold text-primary" id="consumption-total">R$ 0,00</span>
+            </div>
+            <div id="consumption-list" class="max-h-48 overflow-y-auto">
+                <p class="text-center text-muted py-4">Nenhum consumo registrado</p>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary w-full mt-4" data-modal-close="collaborator-consume-modal">
+            Fechar
+        </button>
+    </div>
+</div>
+
 <style>
 .payment-method-btn {
     display: flex;
@@ -578,6 +669,10 @@ const EmployeeController = {
     activeShift: null,
     currentUser: null,
     paymentMethod: 'cash',
+    collaborators: [],
+    staffUsers: [],
+    selectedCollaborator: null,
+    unsubscribers: [],
 
     async init() {
         console.log('Initializing Employee Dashboard...');
@@ -594,12 +689,16 @@ const EmployeeController = {
         this.setupFormHandlers();
         this.setupProductsModal();
         this.setupCashRegister();
+        this.setupCollaboratorsHandlers();
 
         // Load shift data
         await this.loadShiftData();
 
         // Load products
         await this.loadProducts();
+
+        // Load staff users for adding collaborators
+        await this.loadStaffUsers();
     },
 
     setupModalHandlers() {
@@ -825,6 +924,7 @@ const EmployeeController = {
         document.getElementById('no-shift')?.classList.add('hidden');
         document.getElementById('active-shift')?.classList.remove('hidden');
         document.getElementById('quick-actions')?.classList.remove('hidden');
+        document.getElementById('add-collaborator-btn')?.classList.remove('hidden');
 
         if (this.activeShift) {
             const startTime = new Date(this.activeShift.startTime);
@@ -833,6 +933,27 @@ const EmployeeController = {
 
             this.startTimer();
             this.updateStats();
+
+            // Subscribe to collaborators
+            this.loadShiftCollaborators();
+        }
+    },
+
+    async loadShiftCollaborators() {
+        if (!this.activeShift) return;
+
+        try {
+            const { subscribeToShiftCollaborators } = await import('./js/firebase-config.js');
+
+            const unsub = subscribeToShiftCollaborators(this.activeShift.id, (collaborators) => {
+                this.collaborators = collaborators;
+                this.renderCollaboratorsList();
+                this.updateStaffSelect();
+            });
+
+            this.unsubscribers.push(unsub);
+        } catch (error) {
+            console.error('Error subscribing to collaborators:', error);
         }
     },
 
@@ -840,11 +961,16 @@ const EmployeeController = {
         document.getElementById('no-shift')?.classList.remove('hidden');
         document.getElementById('active-shift')?.classList.add('hidden');
         document.getElementById('quick-actions')?.classList.add('hidden');
+        document.getElementById('add-collaborator-btn')?.classList.add('hidden');
 
         this.stopTimer();
 
         document.getElementById('today-sales').textContent = 'R$ 0,00';
         document.getElementById('today-orders').textContent = '0';
+
+        // Clear collaborators
+        this.collaborators = [];
+        this.renderCollaboratorsList();
     },
 
     timerInterval: null,
@@ -946,16 +1072,20 @@ const EmployeeController = {
 
     async loadProducts() {
         try {
-            const { subscribeToProducts } = await import('./js/firebase-config.js');
+            const { subscribeToProductsRTDB } = await import('./js/firebase-config.js');
 
-            const unsub = subscribeToProducts((products) => {
+            // Use Realtime Database for real-time product updates
+            const unsub = subscribeToProductsRTDB((products) => {
+                console.log('Products updated (RTDB):', products.length);
                 this.products = products;
                 this.renderProducts();
+                this.updateConsumeProductSelect(); // Update consumption select
             });
 
             if (window.App?.state?.unsubscribers) {
                 window.App.state.unsubscribers.push(unsub);
             }
+            this.unsubscribers.push(unsub);
         } catch (error) {
             console.error('Error loading products:', error);
         }
@@ -1200,11 +1330,288 @@ const EmployeeController = {
         timeline.insertBefore(item, timeline.firstChild);
     },
 
+    // ==================== COLLABORATORS ====================
+
+    setupCollaboratorsHandlers() {
+        // Add collaborator button
+        document.getElementById('add-collaborator-btn')?.addEventListener('click', () => {
+            this.openModal('add-collaborator-modal');
+        });
+
+        // Add collaborator form
+        document.getElementById('add-collaborator-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleAddCollaborator(e);
+        });
+
+        // Collaborator consume form
+        document.getElementById('collaborator-consume-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.handleAddConsumption(e);
+        });
+    },
+
+    async loadStaffUsers() {
+        try {
+            const { getStaffUsers } = await import('./js/firebase-config.js');
+            this.staffUsers = await getStaffUsers();
+            this.updateStaffSelect();
+        } catch (error) {
+            console.error('Error loading staff users:', error);
+        }
+    },
+
+    updateStaffSelect() {
+        const select = document.getElementById('collaborator-select');
+        if (!select) return;
+
+        // Filter out users already in shift
+        const available = this.staffUsers.filter(user =>
+            !this.collaborators.some(c => c.id === user.id) &&
+            user.id !== this.currentUser?.id
+        );
+
+        select.innerHTML = '<option value="">Selecione um funcionario...</option>' +
+            available.map(user => `
+                <option value="${user.id}" data-name="${user.name}" data-role="${user.role || 'staff'}">
+                    ${user.name} (${user.role === 'manager' ? 'Gerente' : 'Funcionario'})
+                </option>
+            `).join('');
+    },
+
+    subscribeToCollaborators() {
+        if (!this.activeShift) return;
+
+        const { subscribeToShiftCollaborators } = window.FirebaseConfig || {};
+        if (!subscribeToShiftCollaborators) return;
+
+        const unsub = subscribeToShiftCollaborators(this.activeShift.id, (collaborators) => {
+            this.collaborators = collaborators;
+            this.renderCollaboratorsList();
+            this.updateStaffSelect();
+        });
+
+        this.unsubscribers.push(unsub);
+    },
+
+    renderCollaboratorsList() {
+        const list = document.getElementById('collaborators-list');
+        const countBadge = document.getElementById('active-collaborators-count');
+
+        if (!list) return;
+
+        if (countBadge) {
+            countBadge.textContent = `${this.collaborators.length} ativos`;
+        }
+
+        if (this.collaborators.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state py-8">
+                    <div class="empty-state-icon">
+                        <span class="material-symbols-outlined">group_off</span>
+                    </div>
+                    <h3>Nenhum colaborador</h3>
+                    <p>Adicione colaboradores ao turno</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = this.collaborators.map(collab => `
+            <div class="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
+                <div class="flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(collab.name)}&background=random"
+                         alt="${collab.name}"
+                         class="w-10 h-10 rounded-full">
+                    <div>
+                        <p class="font-medium">${collab.name}</p>
+                        <p class="text-xs text-muted">${collab.role === 'manager' ? 'Gerente' : 'Funcionario'}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-sm btn-secondary" onclick="EmployeeController.openConsumeModal('${collab.id}')">
+                        <span class="material-symbols-outlined text-sm">receipt_long</span>
+                        ${collab.totalConsumption ? this.formatCurrency(collab.totalConsumption) : 'Consumo'}
+                    </button>
+                    <button class="btn btn-sm text-danger" onclick="EmployeeController.removeCollaborator('${collab.id}')">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    async handleAddCollaborator(e) {
+        const select = document.getElementById('collaborator-select');
+        const selectedOption = select.options[select.selectedIndex];
+        const userId = select.value;
+
+        if (!userId || !this.activeShift) {
+            App.showToast('Selecione um funcionario', 'warning');
+            return;
+        }
+
+        const userName = selectedOption.dataset.name;
+        const role = selectedOption.dataset.role;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+
+        submitBtn.disabled = true;
+
+        try {
+            const { addCollaboratorToShift } = await import('./js/firebase-config.js');
+            await addCollaboratorToShift(this.activeShift.id, userId, userName, role);
+
+            App.showToast(`${userName} adicionado ao turno!`, 'success');
+            this.closeModal('add-collaborator-modal');
+            this.addToActivityTimeline(`${userName} entrou no turno`);
+            select.value = '';
+        } catch (error) {
+            console.error('Error adding collaborator:', error);
+            App.showToast('Erro ao adicionar colaborador', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    },
+
+    async removeCollaborator(collaboratorId) {
+        if (!this.activeShift) return;
+
+        const collab = this.collaborators.find(c => c.id === collaboratorId);
+        if (!collab) return;
+
+        if (!confirm(`Remover ${collab.name} do turno?`)) return;
+
+        try {
+            const { removeCollaboratorFromShift } = await import('./js/firebase-config.js');
+            await removeCollaboratorFromShift(this.activeShift.id, collaboratorId);
+
+            App.showToast(`${collab.name} removido do turno`, 'success');
+            this.addToActivityTimeline(`${collab.name} saiu do turno`);
+        } catch (error) {
+            console.error('Error removing collaborator:', error);
+            App.showToast('Erro ao remover colaborador', 'danger');
+        }
+    },
+
+    openConsumeModal(collaboratorId) {
+        const collab = this.collaborators.find(c => c.id === collaboratorId);
+        if (!collab) return;
+
+        this.selectedCollaborator = collab;
+
+        // Update modal header
+        document.getElementById('consume-collab-name').textContent = collab.name;
+        document.getElementById('consume-collab-role').textContent = collab.role === 'manager' ? 'Gerente' : 'Funcionario';
+        document.getElementById('consume-collab-avatar').src =
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.name)}&background=random`;
+
+        // Load consumptions
+        this.loadCollaboratorConsumptions(collaboratorId);
+
+        this.openModal('collaborator-consume-modal');
+    },
+
+    async loadCollaboratorConsumptions(collaboratorId) {
+        const list = document.getElementById('consumption-list');
+        const totalEl = document.getElementById('consumption-total');
+
+        if (!list || !this.activeShift) return;
+
+        try {
+            const { getCollaboratorConsumptions } = await import('./js/firebase-config.js');
+            const consumptions = await getCollaboratorConsumptions(this.activeShift.id, collaboratorId);
+
+            const total = consumptions.reduce((sum, c) => sum + (c.total || 0), 0);
+            if (totalEl) totalEl.textContent = this.formatCurrency(total);
+
+            if (consumptions.length === 0) {
+                list.innerHTML = '<p class="text-center text-muted py-4">Nenhum consumo registrado</p>';
+                return;
+            }
+
+            list.innerHTML = consumptions.map(c => `
+                <div class="flex items-center justify-between py-2 border-b border-border-light dark:border-border-dark">
+                    <div class="flex items-center gap-3">
+                        <span class="badge badge-secondary">${c.quantity}x</span>
+                        <div>
+                            <p class="font-medium text-sm">${c.productName}</p>
+                            <p class="text-xs text-muted">${new Date(c.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                    </div>
+                    <span class="font-semibold">${this.formatCurrency(c.total)}</span>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading consumptions:', error);
+        }
+    },
+
+    async handleAddConsumption(e) {
+        if (!this.selectedCollaborator || !this.activeShift) return;
+
+        const productSelect = document.getElementById('consume-product');
+        const quantityInput = document.getElementById('consume-quantity');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+
+        const productId = productSelect.value;
+        const quantity = parseInt(quantityInput.value) || 1;
+
+        if (!productId) {
+            App.showToast('Selecione um produto', 'warning');
+            return;
+        }
+
+        const product = this.products.find(p => p.id === productId);
+        if (!product) return;
+
+        submitBtn.disabled = true;
+
+        try {
+            const { addCollaboratorConsumption } = await import('./js/firebase-config.js');
+            await addCollaboratorConsumption(this.activeShift.id, this.selectedCollaborator.id, {
+                productId: product.id,
+                productName: product.name,
+                price: product.price,
+                quantity: quantity,
+                total: product.price * quantity
+            });
+
+            App.showToast('Consumo registrado!', 'success');
+            productSelect.value = '';
+            quantityInput.value = '1';
+
+            // Reload consumptions
+            await this.loadCollaboratorConsumptions(this.selectedCollaborator.id);
+        } catch (error) {
+            console.error('Error adding consumption:', error);
+            App.showToast('Erro ao registrar consumo', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    },
+
+    updateConsumeProductSelect() {
+        const select = document.getElementById('consume-product');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Selecione um produto...</option>' +
+            this.products.map(p => `
+                <option value="${p.id}">${p.name} - ${this.formatCurrency(p.price)}</option>
+            `).join('');
+    },
+
     formatCurrency(value) {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
         }).format(value || 0);
+    },
+
+    cleanup() {
+        this.unsubscribers.forEach(unsub => {
+            if (typeof unsub === 'function') unsub();
+        });
+        this.unsubscribers = [];
     }
 };
 

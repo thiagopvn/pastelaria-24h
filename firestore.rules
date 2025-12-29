@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funcao helper para verificar se usuario esta autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Funcao helper para verificar role do usuario
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Funcao helper para verificar se e admin
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Funcao helper para verificar se e staff ou manager
+    function isStaff() {
+      return isAuthenticated() && getUserRole() in ['staff', 'manager', 'admin'];
+    }
+
+    // Usuarios - admin pode tudo, usuarios podem ler/atualizar proprio perfil
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+
+    // Produtos - todos podem ler, apenas admin pode modificar
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Turnos - staff pode ler, apenas sistema (functions) escreve
+    match /shifts/{shiftId} {
+      allow read: if isAuthenticated();
+      allow create: if isStaff();
+      allow update: if isAdmin() || (isStaff() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Transacoes financeiras - admin apenas
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Relatorios - apenas leitura para todos autenticados
+    match /reports/{reportId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Apenas functions podem escrever
+    }
+
+    // Notificacoes - usuario pode ler/atualizar proprias notificacoes
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.targetUserId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() &&
+        resource.data.targetUserId == request.auth.uid;
+      allow create, delete: if false; // Apenas functions
+    }
+
+    // Configuracoes - todos leem, admin escreve
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Backups - apenas admin pode ver
+    match /backups/{backupId} {
+      allow read: if isAdmin();
+      allow write: if false; // Apenas functions
+    }
+
+    // Correcoes de turno - apenas admin
+    match /shift_corrections/{correctionId} {
+      allow read: if isAdmin();
+      allow write: if false; // Apenas functions
+    }
+  }
+}

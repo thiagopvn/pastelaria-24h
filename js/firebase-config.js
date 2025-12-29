@@ -45,6 +45,11 @@ import {
     child,
     serverTimestamp as rtdbServerTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import {
+    getFunctions,
+    httpsCallable,
+    connectFunctionsEmulator
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -63,6 +68,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const rtdb = getDatabase(app);
+const functions = getFunctions(app, 'southamerica-east1');
+
+// Uncomment for local development with emulators
+// connectFunctionsEmulator(functions, 'localhost', 5001);
 
 // User roles
 export const USER_ROLES = {
@@ -249,6 +258,16 @@ export async function createProduct(productData) {
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
+
+        // Sync to Realtime Database for real-time updates
+        await set(ref(rtdb, `products/${productRef.id}`), {
+            id: productRef.id,
+            ...productData,
+            active: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+
         return { success: true, id: productRef.id };
     } catch (error) {
         console.error('Error creating product:', error);
@@ -265,6 +284,13 @@ export async function updateProduct(productId, productData) {
             ...productData,
             updatedAt: serverTimestamp()
         });
+
+        // Sync to Realtime Database
+        await update(ref(rtdb, `products/${productId}`), {
+            ...productData,
+            updatedAt: Date.now()
+        });
+
         return true;
     } catch (error) {
         console.error('Error updating product:', error);
@@ -278,9 +304,68 @@ export async function updateProduct(productId, productData) {
 export async function deleteProduct(productId) {
     try {
         await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, productId));
+
+        // Remove from Realtime Database
+        await remove(ref(rtdb, `products/${productId}`));
+
         return true;
     } catch (error) {
         console.error('Error deleting product:', error);
+        throw error;
+    }
+}
+
+/**
+ * Subscribe to products changes (Realtime Database - for employee)
+ */
+export function subscribeToProductsRTDB(callback) {
+    const productsRef = ref(rtdb, 'products');
+
+    return onValue(productsRef, (snapshot) => {
+        const products = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                const product = child.val();
+                if (product.active !== false) {
+                    products.push({ id: child.key, ...product });
+                }
+            });
+        }
+        // Sort by category then name
+        products.sort((a, b) => {
+            if (a.category !== b.category) {
+                return (a.category || '').localeCompare(b.category || '');
+            }
+            return (a.name || '').localeCompare(b.name || '');
+        });
+        callback(products);
+    });
+}
+
+/**
+ * Sync all products from Firestore to Realtime Database
+ */
+export async function syncProductsToRTDB() {
+    try {
+        const products = await getAllProducts();
+        const updates = {};
+
+        products.forEach(product => {
+            updates[`products/${product.id}`] = {
+                ...product,
+                createdAt: product.createdAt?.toMillis?.() || Date.now(),
+                updatedAt: product.updatedAt?.toMillis?.() || Date.now()
+            };
+        });
+
+        if (Object.keys(updates).length > 0) {
+            await update(ref(rtdb), updates);
+        }
+
+        console.log(`Synced ${products.length} products to RTDB`);
+        return products.length;
+    } catch (error) {
+        console.error('Error syncing products to RTDB:', error);
         throw error;
     }
 }
@@ -331,25 +416,28 @@ export async function openShift(userId, userName, initialCash, initialCoins = 0)
  */
 export async function closeShift(shiftId, userId, closingData) {
     try {
-        const updates = {
-            [`shifts/${shiftId}/status`]: 'closed',
-            [`shifts/${shiftId}/endTime`]: Date.now(),
-            [`shifts/${shiftId}/closingData`]: {
-                finalCash: parseFloat(closingData.finalCash) || 0,
-                notes: closingData.notes || '',
-                closedAt: Date.now()
-            }
+        // Build closingData object first
+        const closingDataObj = {
+            finalCash: parseFloat(closingData.finalCash) || 0,
+            notes: closingData.notes || '',
+            closedAt: Date.now()
         };
 
-        // Calculate divergence
+        // Calculate divergence before building updates
         const shiftSnapshot = await get(ref(rtdb, `shifts/${shiftId}`));
         if (shiftSnapshot.exists()) {
             const shift = shiftSnapshot.val();
-            const expectedCash = shift.initialCash + shift.totalSales - shift.totalWithdrawals;
-            const divergence = parseFloat(closingData.finalCash) - expectedCash;
-            updates[`shifts/${shiftId}/closingData/expectedCash`] = expectedCash;
-            updates[`shifts/${shiftId}/closingData/divergence`] = divergence;
+            const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
+            const divergence = closingDataObj.finalCash - expectedCash;
+            closingDataObj.expectedCash = expectedCash;
+            closingDataObj.divergence = divergence;
         }
+
+        const updates = {
+            [`shifts/${shiftId}/status`]: 'closed',
+            [`shifts/${shiftId}/endTime`]: Date.now(),
+            [`shifts/${shiftId}/closingData`]: closingDataObj
+        };
 
         await update(ref(rtdb), updates);
 
@@ -409,22 +497,49 @@ export async function getUserActiveShift(userId) {
  */
 export function subscribeToUserShift(userId, callback) {
     const activeShiftRef = ref(rtdb, `activeShifts/${userId}`);
+    let shiftUnsubscribe = null;
+    let currentShiftId = null;
 
-    return onValue(activeShiftRef, async (snapshot) => {
+    const activeShiftUnsubscribe = onValue(activeShiftRef, (snapshot) => {
         if (snapshot.exists()) {
             const { shiftId } = snapshot.val();
-            // Now subscribe to the actual shift
-            onValue(ref(rtdb, `shifts/${shiftId}`), (shiftSnapshot) => {
-                if (shiftSnapshot.exists()) {
-                    callback({ id: shiftId, ...shiftSnapshot.val() });
-                } else {
-                    callback(null);
+
+            // Only create new listener if shiftId changed
+            if (shiftId !== currentShiftId) {
+                // Clean up previous shift listener
+                if (shiftUnsubscribe) {
+                    shiftUnsubscribe();
                 }
-            });
+
+                currentShiftId = shiftId;
+
+                // Subscribe to the actual shift data
+                shiftUnsubscribe = onValue(ref(rtdb, `shifts/${shiftId}`), (shiftSnapshot) => {
+                    if (shiftSnapshot.exists()) {
+                        callback({ id: shiftId, ...shiftSnapshot.val() });
+                    } else {
+                        callback(null);
+                    }
+                });
+            }
         } else {
+            // No active shift - clean up shift listener
+            if (shiftUnsubscribe) {
+                shiftUnsubscribe();
+                shiftUnsubscribe = null;
+            }
+            currentShiftId = null;
             callback(null);
         }
     });
+
+    // Return cleanup function that removes both listeners
+    return () => {
+        activeShiftUnsubscribe();
+        if (shiftUnsubscribe) {
+            shiftUnsubscribe();
+        }
+    };
 }
 
 /**
@@ -874,8 +989,347 @@ export function subscribeToDashboardStats(callback) {
     });
 }
 
+// ==================== COLLABORATORS MANAGEMENT ====================
+
+/**
+ * Get all staff users (for adding collaborators)
+ */
+export async function getStaffUsers() {
+    try {
+        const usersQuery = query(
+            collection(db, COLLECTIONS.USERS),
+            where('role', 'in', ['staff', 'manager'])
+        );
+        const snapshot = await getDocs(usersQuery);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error('Error getting staff users:', error);
+        return [];
+    }
+}
+
+/**
+ * Subscribe to shift collaborators (real-time)
+ */
+export function subscribeToShiftCollaborators(shiftId, callback) {
+    const collaboratorsRef = ref(rtdb, `shifts/${shiftId}/collaborators`);
+
+    return onValue(collaboratorsRef, (snapshot) => {
+        const collaborators = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                collaborators.push({
+                    id: child.key,
+                    ...child.val()
+                });
+            });
+        }
+        callback(collaborators);
+    });
+}
+
+/**
+ * Add consumption to collaborator in shift
+ */
+export async function addCollaboratorConsumption(shiftId, collaboratorId, consumptionData) {
+    try {
+        const consumptionRef = push(ref(rtdb, `shifts/${shiftId}/collaborators/${collaboratorId}/consumptions`));
+        const consumption = {
+            id: consumptionRef.key,
+            ...consumptionData,
+            timestamp: Date.now()
+        };
+
+        await set(consumptionRef, consumption);
+
+        // Update total consumption for collaborator
+        const collabRef = ref(rtdb, `shifts/${shiftId}/collaborators/${collaboratorId}`);
+        const collabSnapshot = await get(collabRef);
+
+        if (collabSnapshot.exists()) {
+            const currentTotal = collabSnapshot.val().totalConsumption || 0;
+            await update(collabRef, {
+                totalConsumption: currentTotal + (consumptionData.total || 0)
+            });
+        }
+
+        return { success: true, consumptionId: consumptionRef.key };
+    } catch (error) {
+        console.error('Error adding consumption:', error);
+        throw error;
+    }
+}
+
+/**
+ * Get collaborator consumptions
+ */
+export async function getCollaboratorConsumptions(shiftId, collaboratorId) {
+    try {
+        const consumptionsRef = ref(rtdb, `shifts/${shiftId}/collaborators/${collaboratorId}/consumptions`);
+        const snapshot = await get(consumptionsRef);
+
+        const consumptions = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                consumptions.push({
+                    id: child.key,
+                    ...child.val()
+                });
+            });
+        }
+
+        return consumptions.sort((a, b) => b.timestamp - a.timestamp);
+    } catch (error) {
+        console.error('Error getting consumptions:', error);
+        return [];
+    }
+}
+
+/**
+ * Subscribe to collaborator consumptions (real-time)
+ */
+export function subscribeToCollaboratorConsumptions(shiftId, collaboratorId, callback) {
+    const consumptionsRef = ref(rtdb, `shifts/${shiftId}/collaborators/${collaboratorId}/consumptions`);
+
+    return onValue(consumptionsRef, (snapshot) => {
+        const consumptions = [];
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                consumptions.push({
+                    id: child.key,
+                    ...child.val()
+                });
+            });
+        }
+        callback(consumptions.sort((a, b) => b.timestamp - a.timestamp));
+    });
+}
+
+/**
+ * Get previous shift data (for opening comparison)
+ */
+export async function getPreviousShiftData(userId) {
+    try {
+        // Query the last closed shift from Firestore
+        const shiftsQuery = query(
+            collection(db, COLLECTIONS.SHIFTS),
+            where('status', '==', 'closed'),
+            orderBy('endTime', 'desc'),
+            limit(1)
+        );
+
+        const snapshot = await getDocs(shiftsQuery);
+
+        if (!snapshot.empty) {
+            const lastShift = snapshot.docs[0].data();
+            const expectedCash = (lastShift.closingData?.expectedCash || 0);
+            const finalCash = (lastShift.closingData?.finalCash || 0);
+
+            return {
+                exists: true,
+                expectedCash: finalCash, // The final cash becomes expected for next shift
+                expectedCoins: lastShift.closingData?.coins || 0,
+                lastClosedAt: lastShift.endTime,
+                divergence: lastShift.closingData?.divergence || 0
+            };
+        }
+
+        return { exists: false, expectedCash: 0, expectedCoins: 0 };
+    } catch (error) {
+        console.error('Error getting previous shift:', error);
+        return { exists: false, expectedCash: 0, expectedCoins: 0 };
+    }
+}
+
+/**
+ * Remove collaborator consumption
+ */
+export async function removeCollaboratorConsumption(shiftId, collaboratorId, consumptionId, amount) {
+    try {
+        await remove(ref(rtdb, `shifts/${shiftId}/collaborators/${collaboratorId}/consumptions/${consumptionId}`));
+
+        // Update total consumption
+        const collabRef = ref(rtdb, `shifts/${shiftId}/collaborators/${collaboratorId}`);
+        const collabSnapshot = await get(collabRef);
+
+        if (collabSnapshot.exists()) {
+            const currentTotal = collabSnapshot.val().totalConsumption || 0;
+            await update(collabRef, {
+                totalConsumption: Math.max(0, currentTotal - amount)
+            });
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error removing consumption:', error);
+        throw error;
+    }
+}
+
+// ==================== CLOUD FUNCTIONS CALLABLE ====================
+
+/**
+ * Gera relatorio diario
+ */
+export async function generateDailyReport(date = null) {
+    try {
+        const generateReport = httpsCallable(functions, 'generateDailyReport');
+        const result = await generateReport({ date });
+        return result.data;
+    } catch (error) {
+        console.error('Error generating daily report:', error);
+        throw error;
+    }
+}
+
+/**
+ * Gera relatorio semanal
+ */
+export async function generateWeeklyReport() {
+    try {
+        const generateReport = httpsCallable(functions, 'generateWeeklyReport');
+        const result = await generateReport({});
+        return result.data;
+    } catch (error) {
+        console.error('Error generating weekly report:', error);
+        throw error;
+    }
+}
+
+/**
+ * Sincroniza todos os produtos via Cloud Function
+ */
+export async function syncAllProductsViaFunction() {
+    try {
+        const syncProducts = httpsCallable(functions, 'syncAllProducts');
+        const result = await syncProducts({});
+        return result.data;
+    } catch (error) {
+        console.error('Error syncing products:', error);
+        throw error;
+    }
+}
+
+/**
+ * Corrige divergencia de turno (apenas admin)
+ */
+export async function correctShiftDivergence(shiftId, correctedAmount, reason, adminNotes = '') {
+    try {
+        const correctDivergence = httpsCallable(functions, 'correctShiftDivergence');
+        const result = await correctDivergence({
+            shiftId,
+            correctedAmount,
+            reason,
+            adminNotes
+        });
+        return result.data;
+    } catch (error) {
+        console.error('Error correcting divergence:', error);
+        throw error;
+    }
+}
+
+/**
+ * Calcula comissao de funcionario
+ */
+export async function calculateEmployeeCommission(userId, startDate, endDate) {
+    try {
+        const calculateCommission = httpsCallable(functions, 'calculateEmployeeCommission');
+        const result = await calculateCommission({
+            userId,
+            startDate,
+            endDate
+        });
+        return result.data;
+    } catch (error) {
+        console.error('Error calculating commission:', error);
+        throw error;
+    }
+}
+
+/**
+ * Busca notificacoes do usuario
+ */
+export function subscribeToNotifications(userId, callback) {
+    const notificationsQuery = query(
+        collection(db, 'notifications'),
+        where('targetUserId', '==', userId),
+        where('read', '==', false),
+        orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(notificationsQuery, (snapshot) => {
+        const notifications = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        callback(notifications);
+    });
+}
+
+/**
+ * Marca notificacao como lida
+ */
+export async function markNotificationAsRead(notificationId) {
+    try {
+        await updateDoc(doc(db, 'notifications', notificationId), {
+            read: true,
+            readAt: serverTimestamp()
+        });
+        return true;
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        throw error;
+    }
+}
+
+/**
+ * Busca backups (apenas admin)
+ */
+export async function getBackups(limitCount = 10) {
+    try {
+        const backupsQuery = query(
+            collection(db, 'backups'),
+            orderBy('date', 'desc'),
+            limit(limitCount)
+        );
+        const snapshot = await getDocs(backupsQuery);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error('Error getting backups:', error);
+        return [];
+    }
+}
+
+/**
+ * Busca correcoes de turno
+ */
+export async function getShiftCorrections(shiftId = null) {
+    try {
+        let correctionsQuery;
+        if (shiftId) {
+            correctionsQuery = query(
+                collection(db, 'shift_corrections'),
+                where('shiftId', '==', shiftId),
+                orderBy('createdAt', 'desc')
+            );
+        } else {
+            correctionsQuery = query(
+                collection(db, 'shift_corrections'),
+                orderBy('createdAt', 'desc'),
+                limit(50)
+            );
+        }
+        const snapshot = await getDocs(correctionsQuery);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error('Error getting shift corrections:', error);
+        return [];
+    }
+}
+
 // ==================== UTILITY EXPORTS ====================
 
-export { serverTimestamp, Timestamp, increment };
+export { serverTimestamp, Timestamp, increment, functions, httpsCallable };
 
 console.log('Firebase initialized successfully');
