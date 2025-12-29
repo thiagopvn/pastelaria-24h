@@ -563,18 +563,24 @@ export function subscribeToUserShift(userId, callback) {
  */
 export function subscribeToAllActiveShifts(callback) {
     const shiftsRef = ref(rtdb, 'shifts');
+    console.log('Subscribing to all shifts...');
 
     return onValue(shiftsRef, (snapshot) => {
         const shifts = [];
+        console.log('Shifts snapshot exists:', snapshot.exists());
         if (snapshot.exists()) {
             snapshot.forEach((childSnapshot) => {
                 const shift = childSnapshot.val();
-                if (shift.status === 'open') {
+                console.log('Shift found:', childSnapshot.key, 'status:', shift?.status);
+                if (shift && shift.status === 'open') {
                     shifts.push({ id: childSnapshot.key, ...shift });
                 }
             });
         }
+        console.log('Active shifts count:', shifts.length);
         callback(shifts);
+    }, (error) => {
+        console.error('Error subscribing to shifts:', error);
     });
 }
 
