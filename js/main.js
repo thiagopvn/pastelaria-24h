@@ -752,48 +752,298 @@ async function handleOpenShift(e) {
 }
 
 async function handleCloseShift(e) {
-    e.preventDefault();
-
-    const finalCash = document.getElementById('final-cash').value;
-    const notes = document.getElementById('shift-notes').value;
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-
-    if (!finalCash) {
-        showToast('Informe o caixa final', 'warning');
-        return;
-    }
+    if (e) e.preventDefault();
 
     if (!AppState.activeShift) {
         showToast('Nenhum turno ativo', 'danger');
         return;
     }
 
-    setButtonLoading(submitBtn, true);
+    showCashRegisterModal();
+}
+
+function showCashRegisterModal() {
+    const shift = AppState.activeShift;
+    if (!shift) return;
+
+    // Calculate expected values
+    const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
+    const totalSales = shift.totalSales || 0;
+
+    // Create modal
+    let modal = document.getElementById('cash-register-modal');
+    let overlay = document.getElementById('cash-register-modal-overlay');
+
+    if (!modal) {
+        overlay = document.createElement('div');
+        overlay.id = 'cash-register-modal-overlay';
+        overlay.className = 'modal-overlay';
+
+        modal = document.createElement('div');
+        modal.id = 'cash-register-modal';
+        modal.className = 'fixed inset-0 z-50 bg-card-light dark:bg-card-dark overflow-y-auto';
+        modal.style.display = 'none';
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+    }
+
+    const startTime = new Date(shift.startTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const shiftDate = new Date(shift.startTime).toLocaleDateString('pt-BR');
+
+    modal.innerHTML = `
+        <div class="min-h-screen flex flex-col">
+            <!-- Header -->
+            <header class="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark">
+                <button onclick="App.closeCashRegisterModal()" class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <div class="text-center">
+                    <h1 class="font-semibold">Fechamento de Caixa</h1>
+                    <span class="text-xs text-muted">${shiftDate} • ${startTime}</span>
+                </div>
+                <div class="w-10"></div>
+            </header>
+
+            <!-- Content -->
+            <main class="flex-1 p-4 space-y-4 pb-32">
+                <!-- Resumo do Turno -->
+                <div class="card p-4 bg-primary/10 border-primary/20">
+                    <h3 class="font-semibold text-primary mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined">info</span>
+                        Resumo do Turno
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-muted">Caixa Inicial</p>
+                            <p class="font-bold">${formatCurrency(shift.initialCash || 0)}</p>
+                        </div>
+                        <div>
+                            <p class="text-muted">Total Vendas</p>
+                            <p class="font-bold text-success">${formatCurrency(totalSales)}</p>
+                        </div>
+                        <div>
+                            <p class="text-muted">Sangrias</p>
+                            <p class="font-bold text-warning">${formatCurrency(shift.totalWithdrawals || 0)}</p>
+                        </div>
+                        <div>
+                            <p class="text-muted">Esperado em Caixa</p>
+                            <p class="font-bold text-primary">${formatCurrency(expectedCash)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 1: Total em Loja -->
+                <div class="card p-4 border-l-4 border-l-primary">
+                    <h3 class="font-semibold mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">storefront</span>
+                        1. Total em Loja
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cédulas (R$)</label>
+                            <input type="number" id="cash-notes" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Moedas (R$)</label>
+                            <input type="number" id="cash-coins" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Retirada para Envelope -->
+                <div class="card p-4 border-l-4 border-l-warning">
+                    <h3 class="font-semibold mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-warning">payments</span>
+                        2. Retirada p/ Envelope
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cédulas Env. (R$)</label>
+                            <input type="number" id="envelope-notes" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Moedas Env. (R$)</label>
+                            <input type="number" id="envelope-coins" step="0.01" min="0"
+                                   class="w-full h-12 px-3 rounded-lg border bg-background-light dark:bg-background-dark text-lg font-medium text-right"
+                                   placeholder="0,00" oninput="App.calculateCashRegister()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Fica em Caixa -->
+                <div class="card p-4 border-l-4 border-l-success bg-success/5">
+                    <h3 class="font-semibold mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-success">savings</span>
+                        3. Fica em Caixa (Troco)
+                    </h3>
+                    <div class="bg-white dark:bg-background-dark rounded-lg p-3 border">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>Cédulas: <strong id="remaining-notes">R$ 0,00</strong></span>
+                            <span>Moedas: <strong id="remaining-coins">R$ 0,00</strong></span>
+                        </div>
+                        <div class="border-t pt-2 flex justify-between items-center">
+                            <span class="font-semibold">Total em Caixa</span>
+                            <span id="remaining-total" class="text-xl font-bold text-success">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divergência (aparece se houver) -->
+                <div id="divergence-alert" class="card p-4 border-l-4 border-l-danger bg-danger/5 hidden">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2 text-danger">
+                        <span class="material-symbols-outlined">warning</span>
+                        Divergência Detectada
+                    </h3>
+                    <p class="text-sm mb-3">Diferença: <strong id="divergence-value">R$ 0,00</strong></p>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Justificativa (obrigatória)</label>
+                        <textarea id="divergence-reason" rows="3"
+                                  class="w-full px-3 py-2 rounded-lg border bg-background-light dark:bg-background-dark resize-none"
+                                  placeholder="Descreva o motivo da diferença..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card p-4">
+                    <label class="block text-sm font-medium mb-1">Observações (opcional)</label>
+                    <textarea id="shift-notes" rows="2"
+                              class="w-full px-3 py-2 rounded-lg border bg-background-light dark:bg-background-dark resize-none"
+                              placeholder="Anotações sobre o turno..."></textarea>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <div class="fixed bottom-0 left-0 right-0 p-4 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-muted">Total Informado</span>
+                    <span id="total-informed" class="text-xl font-bold">R$ 0,00</span>
+                </div>
+                <button onclick="App.confirmCloseShift()" class="btn btn-primary w-full h-12 text-lg font-semibold flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Confirmar Fechamento
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Show modal
+    overlay.classList.add('active');
+    modal.style.display = 'block';
+}
+
+function closeCashRegisterModal() {
+    const modal = document.getElementById('cash-register-modal');
+    const overlay = document.getElementById('cash-register-modal-overlay');
+
+    if (modal) modal.style.display = 'none';
+    if (overlay) overlay.classList.remove('active');
+}
+
+function calculateCashRegister() {
+    const cashNotes = parseFloat(document.getElementById('cash-notes')?.value) || 0;
+    const cashCoins = parseFloat(document.getElementById('cash-coins')?.value) || 0;
+    const envelopeNotes = parseFloat(document.getElementById('envelope-notes')?.value) || 0;
+    const envelopeCoins = parseFloat(document.getElementById('envelope-coins')?.value) || 0;
+
+    const remainingNotes = cashNotes - envelopeNotes;
+    const remainingCoins = cashCoins - envelopeCoins;
+    const totalInformed = cashNotes + cashCoins;
+    const remainingTotal = remainingNotes + remainingCoins;
+
+    // Update displays
+    document.getElementById('remaining-notes').textContent = formatCurrency(Math.max(0, remainingNotes));
+    document.getElementById('remaining-coins').textContent = formatCurrency(Math.max(0, remainingCoins));
+    document.getElementById('remaining-total').textContent = formatCurrency(Math.max(0, remainingTotal));
+    document.getElementById('total-informed').textContent = formatCurrency(totalInformed);
+
+    // Calculate divergence
+    const shift = AppState.activeShift;
+    if (shift) {
+        const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
+        const divergence = totalInformed - expectedCash;
+
+        const divergenceAlert = document.getElementById('divergence-alert');
+        const divergenceValue = document.getElementById('divergence-value');
+
+        if (Math.abs(divergence) > 0.5) {
+            divergenceAlert.classList.remove('hidden');
+            divergenceValue.textContent = (divergence > 0 ? '+' : '') + formatCurrency(divergence);
+            divergenceValue.className = divergence > 0 ? 'text-success font-bold' : 'text-danger font-bold';
+        } else {
+            divergenceAlert.classList.add('hidden');
+        }
+
+        AppState.closingData = {
+            cashNotes,
+            cashCoins,
+            envelopeNotes,
+            envelopeCoins,
+            remainingNotes: Math.max(0, remainingNotes),
+            remainingCoins: Math.max(0, remainingCoins),
+            totalInformed,
+            expectedCash,
+            divergence
+        };
+    }
+}
+
+async function confirmCloseShift() {
+    if (!AppState.activeShift || !AppState.closingData) {
+        showToast('Preencha os valores do caixa', 'warning');
+        return;
+    }
+
+    const { divergence } = AppState.closingData;
+    const divergenceReason = document.getElementById('divergence-reason')?.value || '';
+    const notes = document.getElementById('shift-notes')?.value || '';
+
+    // Require justification for divergence > R$0.50
+    if (Math.abs(divergence) > 0.5 && !divergenceReason.trim()) {
+        showToast('Informe a justificativa da divergência', 'warning');
+        document.getElementById('divergence-reason')?.focus();
+        return;
+    }
 
     try {
+        showLoading();
         const { closeShift } = await import('./firebase-config.js');
 
         await closeShift(
             AppState.activeShift.id,
             AppState.currentUser.id,
-            { finalCash, notes }
+            {
+                ...AppState.closingData,
+                divergenceReason,
+                notes,
+                closedAt: Date.now()
+            }
         );
 
         showToast('Turno encerrado com sucesso!', 'success');
-        closeModal('close-shift-modal');
+        closeCashRegisterModal();
 
         // Stop timer
         if (shiftTimerInterval) {
             clearInterval(shiftTimerInterval);
         }
 
-        // Reset form
-        e.target.reset();
+        // Reset state
+        AppState.activeShift = null;
+        AppState.closingData = null;
+        showNoShift();
+
     } catch (error) {
         console.error('Error closing shift:', error);
         showToast('Erro ao encerrar turno', 'danger');
     } finally {
-        setButtonLoading(submitBtn, false);
+        hideLoading();
     }
 }
 
@@ -1704,6 +1954,9 @@ window.App = {
     updateSaleTotal,
     selectPayment,
     confirmSale,
+    closeCashRegisterModal,
+    calculateCashRegister,
+    confirmCloseShift,
     viewShiftDetails: (shiftId) => {
         console.log('View shift:', shiftId);
         showToast('Funcionalidade em desenvolvimento', 'info');
