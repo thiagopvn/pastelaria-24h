@@ -950,3 +950,70 @@
 .toggle input:checked ~ .toggle-thumb {
     transform: translateX(1.25rem);
 }
+
+/* Payment Options */
+.payment-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: var(--background);
+    border: 2px solid transparent;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.payment-option span {
+    font-size: 0.75rem;
+}
+
+.payment-option .material-symbols-outlined {
+    font-size: 1.5rem;
+}
+
+.payment-option:hover {
+    border-color: var(--border);
+}
+
+.payment-option.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Product Card for Employee */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--card);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.product-card:active {
+    transform: scale(0.98);
+}
+
+.product-card .product-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.product-card .product-price {
+    color: var(--primary);
+    font-weight: 700;
+}

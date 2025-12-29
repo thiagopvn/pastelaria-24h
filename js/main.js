@@ -1491,6 +1491,196 @@ async function deleteUserHandler(userId) {
     }
 }
 
+// ==================== SALE FUNCTIONS ====================
+
+function selectProduct(productId) {
+    const product = AppState.products?.find(p => p.id === productId);
+    if (!product) {
+        showToast('Produto não encontrado', 'danger');
+        return;
+    }
+
+    if (!AppState.activeShift) {
+        showToast('Abra um turno primeiro', 'warning');
+        return;
+    }
+
+    AppState.selectedProduct = product;
+    showSaleModal(product);
+}
+
+function showSaleModal(product) {
+    // Create modal if doesn't exist
+    let modal = document.getElementById('sale-modal');
+    let overlay = document.getElementById('sale-modal-overlay');
+
+    if (!modal) {
+        overlay = document.createElement('div');
+        overlay.id = 'sale-modal-overlay';
+        overlay.className = 'modal-overlay';
+        overlay.onclick = () => closeSaleModal();
+
+        modal = document.createElement('div');
+        modal.id = 'sale-modal';
+        modal.className = 'fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300';
+        modal.style.maxHeight = '80vh';
+        modal.style.overflowY = 'auto';
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="p-6">
+            <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-4"></div>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">Registrar Venda</h2>
+                <button onclick="App.closeSaleModal()" class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="bg-background-light dark:bg-background-dark rounded-xl p-4 mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="product-icon ${product.category === 'bebidas' ? 'drink' : 'food'}">
+                        <span class="material-symbols-outlined">${getProductIcon(product.category)}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">${product.name}</h3>
+                        <p class="text-primary font-bold">${formatCurrency(product.price)}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Quantidade</label>
+                    <div class="flex items-center gap-4">
+                        <button onclick="App.changeQuantity(-1)" class="w-12 h-12 rounded-full bg-background-light dark:bg-background-dark flex items-center justify-center text-xl font-bold">-</button>
+                        <input type="number" id="sale-quantity" value="1" min="1" class="w-20 h-12 text-center text-2xl font-bold bg-transparent border-b-2 border-primary" onchange="App.updateSaleTotal()">
+                        <button onclick="App.changeQuantity(1)" class="w-12 h-12 rounded-full bg-background-light dark:bg-background-dark flex items-center justify-center text-xl font-bold">+</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Forma de Pagamento</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="App.selectPayment('cash')" class="payment-option active" data-payment="cash">
+                            <span class="material-symbols-outlined">payments</span>
+                            <span>Dinheiro</span>
+                        </button>
+                        <button onclick="App.selectPayment('card')" class="payment-option" data-payment="card">
+                            <span class="material-symbols-outlined">credit_card</span>
+                            <span>Cartão</span>
+                        </button>
+                        <button onclick="App.selectPayment('pix')" class="payment-option" data-payment="pix">
+                            <span class="material-symbols-outlined">qr_code</span>
+                            <span>PIX</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 rounded-xl p-4 mt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg">Total:</span>
+                        <span id="sale-total" class="text-2xl font-bold text-primary">${formatCurrency(product.price)}</span>
+                    </div>
+                </div>
+
+                <button onclick="App.confirmSale()" class="btn btn-primary w-full py-4 text-lg font-semibold mt-4">
+                    <span class="material-symbols-outlined">check</span>
+                    Confirmar Venda
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Show modal
+    overlay.classList.add('active');
+    modal.style.display = 'block';
+    setTimeout(() => {
+        modal.style.transform = 'translateY(0)';
+    }, 10);
+
+    AppState.selectedPayment = 'cash';
+}
+
+function closeSaleModal() {
+    const modal = document.getElementById('sale-modal');
+    const overlay = document.getElementById('sale-modal-overlay');
+
+    if (modal) {
+        modal.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+
+    AppState.selectedProduct = null;
+    AppState.selectedPayment = 'cash';
+}
+
+function changeQuantity(delta) {
+    const input = document.getElementById('sale-quantity');
+    if (!input) return;
+
+    let qty = parseInt(input.value) || 1;
+    qty = Math.max(1, qty + delta);
+    input.value = qty;
+    updateSaleTotal();
+}
+
+function updateSaleTotal() {
+    const input = document.getElementById('sale-quantity');
+    const totalEl = document.getElementById('sale-total');
+    if (!input || !totalEl || !AppState.selectedProduct) return;
+
+    const qty = parseInt(input.value) || 1;
+    const total = qty * AppState.selectedProduct.price;
+    totalEl.textContent = formatCurrency(total);
+}
+
+function selectPayment(method) {
+    AppState.selectedPayment = method;
+
+    document.querySelectorAll('.payment-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.payment === method);
+    });
+}
+
+async function confirmSale() {
+    if (!AppState.selectedProduct || !AppState.activeShift) {
+        showToast('Erro ao registrar venda', 'danger');
+        return;
+    }
+
+    const qtyInput = document.getElementById('sale-quantity');
+    const quantity = parseInt(qtyInput?.value) || 1;
+    const total = quantity * AppState.selectedProduct.price;
+
+    try {
+        const { addSaleToShift } = await import('./firebase-config.js');
+
+        await addSaleToShift(AppState.activeShift.id, {
+            productId: AppState.selectedProduct.id,
+            productName: AppState.selectedProduct.name,
+            quantity: quantity,
+            unitPrice: AppState.selectedProduct.price,
+            total: total,
+            paymentMethod: AppState.selectedPayment
+        });
+
+        showToast(`Venda registrada: ${quantity}x ${AppState.selectedProduct.name}`, 'success');
+        closeSaleModal();
+    } catch (error) {
+        console.error('Error registering sale:', error);
+        showToast('Erro ao registrar venda', 'danger');
+    }
+}
+
 // Export utilities for use in other modules
 window.App = {
     state: AppState,
@@ -1508,6 +1698,12 @@ window.App = {
     setButtonLoading,
     deleteProduct: deleteProductHandler,
     deleteUser: deleteUserHandler,
+    selectProduct,
+    closeSaleModal,
+    changeQuantity,
+    updateSaleTotal,
+    selectPayment,
+    confirmSale,
     viewShiftDetails: (shiftId) => {
         console.log('View shift:', shiftId);
         showToast('Funcionalidade em desenvolvimento', 'info');
