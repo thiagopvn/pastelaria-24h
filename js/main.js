@@ -771,13 +771,14 @@ async function showCashRegisterModal() {
     const totalSales = shift.totalSales || 0;
 
     // Get last shift's card values for calculation
-    const { getLastClosedShiftCardValues, getMidnightCrossingInfo } = await import('./firebase-config.js');
+    const { getLastClosedShiftCardValues, getMidnightCrossingInfo, calculateRealCardSales } = await import('./firebase-config.js');
     const previousCardValues = await getLastClosedShiftCardValues(shift.startTime);
     const midnightInfo = getMidnightCrossingInfo(shift.startTime);
 
-    // Store for later use
+    // Store for later use (cache the function to avoid dynamic imports on each input)
     AppState.previousCardValues = previousCardValues;
     AppState.midnightInfo = midnightInfo;
+    AppState.calculateRealCardSales = calculateRealCardSales;
 
     // Create modal
     let modal = document.getElementById('cash-register-modal');
@@ -1078,7 +1079,7 @@ function closeCashRegisterModal() {
     if (overlay) overlay.classList.remove('active');
 }
 
-async function calculateCashRegister() {
+function calculateCashRegister() {
     const cashNotes = parseFloat(document.getElementById('cash-notes')?.value) || 0;
     const cashCoins = parseFloat(document.getElementById('cash-coins')?.value) || 0;
     const envelopeNotes = parseFloat(document.getElementById('envelope-notes')?.value) || 0;
@@ -1100,15 +1101,17 @@ async function calculateCashRegister() {
     const remainingCoins = cashCoins - envelopeCoins;
 
     // Update cash displays
-    document.getElementById('remaining-notes').textContent = formatCurrency(Math.max(0, remainingNotes));
-    document.getElementById('remaining-coins').textContent = formatCurrency(Math.max(0, remainingCoins));
-    document.getElementById('remaining-total').textContent = formatCurrency(Math.max(0, remainingNotes + remainingCoins));
+    const remainingNotesEl = document.getElementById('remaining-notes');
+    const remainingCoinsEl = document.getElementById('remaining-coins');
+    const remainingTotalEl = document.getElementById('remaining-total');
 
-    // Calculate real card sales using the function from firebase-config
+    if (remainingNotesEl) remainingNotesEl.textContent = formatCurrency(Math.max(0, remainingNotes));
+    if (remainingCoinsEl) remainingCoinsEl.textContent = formatCurrency(Math.max(0, remainingCoins));
+    if (remainingTotalEl) remainingTotalEl.textContent = formatCurrency(Math.max(0, remainingNotes + remainingCoins));
+
+    // Calculate real card sales using the cached function
     const shift = AppState.activeShift;
-    if (!shift) return;
-
-    const { calculateRealCardSales } = await import('./firebase-config.js');
+    if (!shift || !AppState.calculateRealCardSales) return;
 
     const currentCardValues = {
         stone_dc: stoneDc,
@@ -1126,7 +1129,7 @@ async function calculateCashRegister() {
         pix_cumulative: 0
     };
 
-    const cardCalculations = calculateRealCardSales(currentCardValues, previousCardValues);
+    const cardCalculations = AppState.calculateRealCardSales(currentCardValues, previousCardValues);
 
     // Update card real value displays
     const methods = [
@@ -1179,7 +1182,8 @@ async function calculateCashRegister() {
     // Calculate total informed (cash + cards)
     const totalCashInformed = cashNotes + cashCoins;
     const totalInformed = totalCashInformed + totalCardsReal;
-    document.getElementById('total-informed').textContent = formatCurrency(totalInformed);
+    const totalInformedEl = document.getElementById('total-informed');
+    if (totalInformedEl) totalInformedEl.textContent = formatCurrency(totalInformed);
 
     // Calculate divergence (comparing total informed with expected)
     const expectedCash = (shift.initialCash || 0) + (shift.totalSales || 0) - (shift.totalWithdrawals || 0);
