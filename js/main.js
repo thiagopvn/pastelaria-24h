@@ -453,8 +453,92 @@ async function initEmployeeDashboard() {
     // Load user's active shift
     await loadUserShift();
 
+    // Load products for employee
+    await loadEmployeeProducts();
+
     // Initialize shift forms
     initShiftForms();
+}
+
+async function loadEmployeeProducts() {
+    try {
+        const { subscribeToProductsRTDB } = await import('./firebase-config.js');
+
+        const unsub = subscribeToProductsRTDB((products) => {
+            console.log('Products loaded for employee:', products.length);
+            AppState.products = products;
+            renderEmployeeProducts(products);
+        });
+
+        AppState.unsubscribers.push(unsub);
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+function renderEmployeeProducts(products) {
+    const container = document.getElementById('products-grid');
+    if (!container) {
+        console.log('products-grid not found, trying products-list');
+        const altContainer = document.getElementById('products-list');
+        if (!altContainer) return;
+        renderProductsInList(altContainer, products);
+        return;
+    }
+
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-muted col-span-full">
+                <span class="material-symbols-outlined text-4xl mb-2">inventory_2</span>
+                <p>Nenhum produto disponivel</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = products.map(product => `
+        <div class="product-card" data-product-id="${product.id}" onclick="App.selectProduct('${product.id}')">
+            <div class="product-icon ${product.category === 'bebidas' ? 'drink' : 'food'}">
+                <span class="material-symbols-outlined">${getProductIcon(product.category)}</span>
+            </div>
+            <h4 class="product-name">${product.name}</h4>
+            <p class="product-price">${formatCurrency(product.price)}</p>
+        </div>
+    `).join('');
+}
+
+function renderProductsInList(container, products) {
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-muted">
+                <span class="material-symbols-outlined text-4xl mb-2">inventory_2</span>
+                <p>Nenhum produto disponivel</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = products.map(product => `
+        <div class="product-item" data-product-id="${product.id}">
+            <div class="product-icon ${product.category === 'bebidas' ? 'drink' : 'food'}">
+                <span class="material-symbols-outlined">${getProductIcon(product.category)}</span>
+            </div>
+            <div class="product-info">
+                <span class="product-name">${product.name}</span>
+                <span class="product-price">${formatCurrency(product.price)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getProductIcon(category) {
+    switch (category?.toLowerCase()) {
+        case 'bebidas': return 'local_drink';
+        case 'lanches': return 'lunch_dining';
+        case 'porcoes': return 'restaurant';
+        case 'sobremesas': return 'cake';
+        default: return 'restaurant';
+    }
 }
 
 async function loadUserShift() {
@@ -756,13 +840,19 @@ function updateAdminStats(stats) {
 }
 
 function updateActiveShiftsList(shifts) {
-    const container = document.querySelector('.shift-item')?.parentElement;
-    if (!container) return;
+    const container = document.getElementById('shifts-container');
+    const countEl = document.getElementById('active-shifts-count');
+
+    console.log('updateActiveShiftsList called:', shifts.length, 'shifts');
+
+    if (!container) {
+        console.error('shifts-container not found');
+        return;
+    }
 
     // Update count
-    const countEl = container.previousElementSibling?.querySelector('.text-success');
     if (countEl) {
-        countEl.textContent = `${shifts.length} ativos`;
+        countEl.textContent = `${shifts.length} ${shifts.length === 1 ? 'ativo' : 'ativos'}`;
     }
 
     if (shifts.length === 0) {
