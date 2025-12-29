@@ -437,6 +437,7 @@ const AdminController = {
 
             // Subscribe to active shifts
             const shiftsUnsub = subscribeToAllActiveShifts((shifts) => {
+                console.log('Received shifts in dashboard:', shifts.length, shifts);
                 this.shifts = shifts;
                 this.updateShiftsDisplay();
                 this.updateAlerts();
@@ -475,14 +476,20 @@ const AdminController = {
     },
 
     updateShiftsDisplay() {
+        console.log('updateShiftsDisplay called, shifts:', this.shifts.length);
         const container = document.getElementById('shifts-container');
         const countEl = document.getElementById('active-shifts-count');
+
+        console.log('Container found:', !!container, 'CountEl found:', !!countEl);
 
         if (countEl) {
             countEl.textContent = `${this.shifts.length} ${this.shifts.length === 1 ? 'ativo' : 'ativos'}`;
         }
 
-        if (!container) return;
+        if (!container) {
+            console.error('shifts-container not found!');
+            return;
+        }
 
         if (this.shifts.length === 0) {
             container.innerHTML = `
