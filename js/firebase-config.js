@@ -320,17 +320,31 @@ export async function deleteProduct(productId) {
  */
 export function subscribeToProductsRTDB(callback) {
     const productsRef = ref(rtdb, 'products');
+    let syncAttempted = false;
 
-    return onValue(productsRef, (snapshot) => {
+    return onValue(productsRef, async (snapshot) => {
         const products = [];
         if (snapshot.exists()) {
             snapshot.forEach((child) => {
                 const product = child.val();
-                if (product.active !== false) {
+                if (product && product.active !== false) {
                     products.push({ id: child.key, ...product });
                 }
             });
         }
+
+        // If no products in RTDB and haven't tried syncing yet, sync from Firestore
+        if (products.length === 0 && !syncAttempted) {
+            syncAttempted = true;
+            console.log('No products in RTDB, syncing from Firestore...');
+            try {
+                await syncProductsToRTDB();
+            } catch (err) {
+                console.warn('Auto-sync failed:', err);
+            }
+            return; // Will get called again after sync
+        }
+
         // Sort by category then name
         products.sort((a, b) => {
             if (a.category !== b.category) {
@@ -338,6 +352,8 @@ export function subscribeToProductsRTDB(callback) {
             }
             return (a.name || '').localeCompare(b.name || '');
         });
+
+        console.log('Products from RTDB:', products.length);
         callback(products);
     });
 }
