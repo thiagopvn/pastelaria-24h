@@ -219,66 +219,199 @@
 
 <!-- Close Shift Modal -->
 <div id="close-shift-modal-overlay" class="modal-overlay"></div>
-<div id="close-shift-modal" class="fixed inset-x-0 bottom-0 z-50 bg-card-light dark:bg-card-dark rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto" style="display: none;">
-    <div class="p-6">
-        <div class="w-12 h-1.5 bg-border-light dark:bg-border-dark rounded-full mx-auto mb-6"></div>
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="text-xl font-bold">Fechar Turno</h2>
-                <p class="text-sm text-muted">Insira os valores de fechamento</p>
-            </div>
-            <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="close-shift-modal">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <!-- Shift Summary -->
-        <div class="bg-background-light dark:bg-background-dark rounded-xl p-4 mb-4">
-            <h3 class="text-sm font-semibold text-muted mb-3">Resumo do Turno</h3>
-            <div class="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                    <p class="text-muted">Caixa Inicial</p>
-                    <p class="font-semibold" id="summary-initial-cash">R$ 0,00</p>
-                </div>
-                <div>
-                    <p class="text-muted">Total Vendas</p>
-                    <p class="font-semibold text-success" id="summary-total-sales">R$ 0,00</p>
-                </div>
-                <div>
-                    <p class="text-muted">Sangrias</p>
-                    <p class="font-semibold text-warning" id="summary-withdrawals">R$ 0,00</p>
-                </div>
-                <div>
-                    <p class="text-muted">Caixa Esperado</p>
-                    <p class="font-semibold text-primary" id="summary-expected-cash">R$ 0,00</p>
-                </div>
-            </div>
-        </div>
-        <form id="close-shift-form" class="space-y-4">
-            <div>
-                <label class="text-sm font-medium text-muted block mb-2">Caixa Final (R$)</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted">R$</span>
-                    <input type="number" step="0.01" id="final-cash" class="input pl-10 font-mono" placeholder="0,00" required>
-                </div>
-            </div>
-            <div id="divergence-alert" class="hidden bg-danger/10 border border-danger/20 rounded-lg p-3">
-                <div class="flex items-center gap-2 text-danger">
-                    <span class="material-symbols-outlined">warning</span>
-                    <span class="font-medium">Divergencia: <span id="divergence-value">R$ 0,00</span></span>
-                </div>
-            </div>
-            <div>
-                <label class="text-sm font-medium text-muted block mb-2">Observacoes</label>
-                <textarea id="shift-notes" class="input resize-none h-24" placeholder="Observacoes sobre o turno..."></textarea>
-            </div>
-            <div class="flex gap-3 pt-4">
-                <button type="button" class="btn btn-secondary flex-1" data-modal-close="close-shift-modal">Cancelar</button>
-                <button type="submit" class="btn btn-danger flex-[2]">
-                    <span class="material-symbols-outlined">stop</span>
-                    Encerrar Turno
+<div id="close-shift-modal" class="fixed inset-0 z-50 bg-card-light dark:bg-card-dark overflow-y-auto" style="display: none;">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <div class="sticky top-0 z-10 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark">
+            <div class="flex items-center justify-between p-4">
+                <button class="p-2 rounded-full hover:bg-background-light dark:hover:bg-background-dark" data-modal-close="close-shift-modal">
+                    <span class="material-symbols-outlined">close</span>
                 </button>
+                <div class="text-center">
+                    <h2 class="font-bold">Fechamento de Caixa</h2>
+                    <p class="text-xs text-muted" id="close-shift-date">Carregando...</p>
+                </div>
+                <div class="w-10"></div>
             </div>
-        </form>
+        </div>
+
+        <div class="p-4 space-y-4 pb-32">
+            <!-- Shift Summary -->
+            <div class="card p-4 bg-primary/10 border-primary/20">
+                <h3 class="font-semibold text-primary mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">info</span>
+                    Resumo do Turno
+                </h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="text-muted">Caixa Inicial</p>
+                        <p class="font-bold" id="summary-initial-cash">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Total Vendas</p>
+                        <p class="font-bold text-success" id="summary-total-sales">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Sangrias</p>
+                        <p class="font-bold text-warning" id="summary-withdrawals">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-muted">Esperado em Caixa</p>
+                        <p class="font-bold text-primary" id="summary-expected-cash">R$ 0,00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Midnight Crossing Alert -->
+            <div id="midnight-alert" class="hidden card p-4 border-l-4" style="border-left-color: #f97316; background: rgba(249, 115, 22, 0.1);">
+                <h3 class="font-semibold mb-2 flex items-center gap-2" style="color: #f97316;">
+                    <span class="material-symbols-outlined">schedule</span>
+                    Turno Cruzou Meia-Noite
+                </h3>
+                <p id="midnight-info" class="text-sm text-muted">Valores das maquininhas serao recalculados automaticamente.</p>
+            </div>
+
+            <!-- Section 1: Total em Loja (Dinheiro) -->
+            <div class="card p-4 border-l-4 border-l-primary">
+                <h3 class="font-semibold mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">storefront</span>
+                    1. Total em Loja (Dinheiro)
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">Cedulas (R$)</label>
+                        <input type="number" step="0.01" min="0" id="cash-notes" class="input text-right text-lg font-mono" placeholder="0,00">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">Moedas (R$)</label>
+                        <input type="number" step="0.01" min="0" id="cash-coins" class="input text-right text-lg font-mono" placeholder="0,00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Retirada para Envelope -->
+            <div class="card p-4 border-l-4 border-l-warning">
+                <h3 class="font-semibold mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-warning">payments</span>
+                    2. Retirada p/ Envelope
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">Cedulas Env. (R$)</label>
+                        <input type="number" step="0.01" min="0" id="envelope-notes" class="input text-right text-lg font-mono" placeholder="0,00">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">Moedas Env. (R$)</label>
+                        <input type="number" step="0.01" min="0" id="envelope-coins" class="input text-right text-lg font-mono" placeholder="0,00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Fica em Caixa -->
+            <div class="card p-4 border-l-4 border-l-success bg-success/5">
+                <h3 class="font-semibold mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-success">savings</span>
+                    3. Fica em Caixa (Troco)
+                </h3>
+                <div class="bg-white dark:bg-background-dark rounded-lg p-3 border border-border-light dark:border-border-dark">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span>Cedulas: <strong id="remaining-notes">R$ 0,00</strong></span>
+                        <span>Moedas: <strong id="remaining-coins">R$ 0,00</strong></span>
+                    </div>
+                    <div class="border-t border-border-light dark:border-border-dark pt-2 flex justify-between items-center">
+                        <span class="font-semibold">Total em Caixa</span>
+                        <span id="remaining-total" class="text-xl font-bold text-success">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Maquininhas de Cartao -->
+            <div class="card p-4 border-l-4" style="border-left-color: #a855f7;">
+                <h3 class="font-semibold mb-2 flex items-center gap-2" style="color: #a855f7;">
+                    <span class="material-symbols-outlined">credit_card</span>
+                    4. Maquininhas de Cartao
+                </h3>
+                <p class="text-xs text-muted mb-3">Informe o valor que aparece no VISOR de cada maquininha agora.</p>
+
+                <!-- Previous values info -->
+                <div id="previous-values-info" class="hidden bg-blue-500/10 rounded-lg p-3 mb-3 text-sm">
+                    <p class="font-medium text-blue-600 dark:text-blue-400 mb-1">
+                        <span class="material-symbols-outlined text-sm align-middle">info</span>
+                        <span id="calculation-mode">Modo de calculo</span>
+                    </p>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-muted mt-2">
+                        <span>Stone DC: <span id="prev-stone-dc">R$ 0,00</span></span>
+                        <span>Stone Voucher: <span id="prev-stone-voucher">R$ 0,00</span></span>
+                        <span>PagBank: <span id="prev-pagbank">R$ 0,00</span></span>
+                        <span>PIX: <span id="prev-pix">R$ 0,00</span></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">Stone DC (R$)</label>
+                        <input type="number" step="0.01" min="0" id="card-stone-dc" class="input text-right font-mono" placeholder="0,00">
+                        <p id="stone-dc-real" class="text-xs text-success mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">Stone Voucher (R$)</label>
+                        <input type="number" step="0.01" min="0" id="card-stone-voucher" class="input text-right font-mono" placeholder="0,00">
+                        <p id="stone-voucher-real" class="text-xs text-success mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">PagBank (R$)</label>
+                        <input type="number" step="0.01" min="0" id="card-pagbank" class="input text-right font-mono" placeholder="0,00">
+                        <p id="pagbank-real" class="text-xs text-success mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted block mb-1">PIX (R$)</label>
+                        <input type="number" step="0.01" min="0" id="card-pix" class="input text-right font-mono" placeholder="0,00">
+                        <p id="pix-real" class="text-xs text-success mt-1 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Card Sales Summary -->
+                <div id="card-sales-summary" class="hidden mt-3 p-3 rounded-lg" style="background: rgba(168, 85, 247, 0.1);">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold" style="color: #a855f7;">Total Cartoes (Vendas Reais)</span>
+                        <span id="total-cards-real" class="text-lg font-bold" style="color: #a855f7;">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divergence Alert -->
+            <div id="divergence-alert" class="hidden card p-4 border-l-4 border-l-danger bg-danger/5">
+                <h3 class="font-semibold mb-2 flex items-center gap-2 text-danger">
+                    <span class="material-symbols-outlined">warning</span>
+                    Divergencia Detectada
+                </h3>
+                <p class="text-sm mb-3">Diferenca: <strong id="divergence-value">R$ 0,00</strong></p>
+                <div>
+                    <label class="text-sm font-medium text-muted block mb-1">Justificativa (obrigatoria)</label>
+                    <textarea id="divergence-reason" rows="2" class="input resize-none" placeholder="Descreva o motivo da diferenca..."></textarea>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card p-4">
+                <label class="text-sm font-medium text-muted block mb-1">Observacoes (opcional)</label>
+                <textarea id="shift-notes" rows="2" class="input resize-none" placeholder="Anotacoes sobre o turno..."></textarea>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-muted">Total Geral</span>
+                <span id="total-informed" class="text-xl font-bold">R$ 0,00</span>
+            </div>
+            <form id="close-shift-form">
+                <button type="submit" class="btn btn-primary w-full h-12 text-lg font-semibold">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Confirmar Fechamento
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -755,6 +888,7 @@ const EmployeeController = {
         // Update close shift summary
         if (modalId === 'close-shift-modal') {
             this.updateCloseShiftSummary();
+            this.initCloseShiftModal();
         }
     },
 
@@ -790,9 +924,13 @@ const EmployeeController = {
             await this.handleWithdrawal(e);
         });
 
-        // Final cash input for divergence calculation
-        document.getElementById('final-cash')?.addEventListener('input', (e) => {
-            this.calculateDivergence(parseFloat(e.target.value) || 0);
+        // Input listeners for real-time calculation
+        const calcInputs = ['cash-notes', 'cash-coins', 'envelope-notes', 'envelope-coins',
+                           'card-stone-dc', 'card-stone-voucher', 'card-pagbank', 'card-pix'];
+        calcInputs.forEach(id => {
+            document.getElementById(id)?.addEventListener('input', () => {
+                this.calculateCashRegister();
+            });
         });
     },
 
@@ -824,8 +962,6 @@ const EmployeeController = {
     },
 
     async handleCloseShift(e) {
-        const finalCash = parseFloat(document.getElementById('final-cash').value) || 0;
-        const notes = document.getElementById('shift-notes').value;
         const submitBtn = e.target.querySelector('button[type="submit"]');
 
         if (!this.activeShift) {
@@ -833,15 +969,110 @@ const EmployeeController = {
             return;
         }
 
+        // Collect all field values
+        const cashNotes = parseFloat(document.getElementById('cash-notes')?.value) || 0;
+        const cashCoins = parseFloat(document.getElementById('cash-coins')?.value) || 0;
+        const envelopeNotes = parseFloat(document.getElementById('envelope-notes')?.value) || 0;
+        const envelopeCoins = parseFloat(document.getElementById('envelope-coins')?.value) || 0;
+        const notes = document.getElementById('shift-notes')?.value || '';
+
+        // Card machine values (cumulative from display)
+        const stoneDC = parseFloat(document.getElementById('card-stone-dc')?.value) || 0;
+        const stoneVoucher = parseFloat(document.getElementById('card-stone-voucher')?.value) || 0;
+        const pagbank = parseFloat(document.getElementById('card-pagbank')?.value) || 0;
+        const pix = parseFloat(document.getElementById('card-pix')?.value) || 0;
+
+        // Calculate totals
+        const totalCashInStore = cashNotes + cashCoins;
+        const totalEnvelope = envelopeNotes + envelopeCoins;
+        const cashRemaining = totalCashInStore - totalEnvelope;
+        const totalCards = stoneDC + stoneVoucher + pagbank + pix;
+
+        // Calculate divergence
+        const initialCash = this.activeShift.initialCash || 0;
+        const totalSales = this.activeShift.totalSales || 0;
+        const withdrawals = this.activeShift.totalWithdrawals || 0;
+        const expectedCash = initialCash + totalSales - withdrawals;
+        const divergence = cashRemaining - expectedCash;
+
+        // Get divergence reason if needed
+        const divergenceReason = document.getElementById('divergence-reason')?.value || '';
+
+        // Require justification for divergence > R$0.50
+        if (Math.abs(divergence) > 0.5 && !divergenceReason.trim()) {
+            App.showToast('Informe a justificativa da divergencia', 'warning');
+            document.getElementById('divergence-reason')?.focus();
+            return;
+        }
+
         App.setButtonLoading?.(submitBtn, true) || (submitBtn.disabled = true);
 
         try {
-            const { closeShift } = await import('/js/firebase-config.js');
-            await closeShift(this.activeShift.id, this.currentUser.id, { finalCash, notes });
+            const { closeShift, getLastClosedShiftCardValues, calculateRealCardSales } = await import('/js/firebase-config.js');
+
+            // Get previous card values and calculate real sales
+            const previousValues = await getLastClosedShiftCardValues(this.activeShift.startTime);
+            const currentValues = {
+                stone_dc: stoneDC,
+                stone_voucher: stoneVoucher,
+                pagbank: pagbank,
+                pix: pix
+            };
+            const cardCalculations = calculateRealCardSales(currentValues, previousValues);
+
+            // Prepare closing data
+            const closingData = {
+                // Cash values
+                cashNotes,
+                cashCoins,
+                totalCashInStore,
+                envelopeNotes,
+                envelopeCoins,
+                totalEnvelope,
+                cashRemaining,
+                finalCash: cashRemaining, // Legacy compatibility
+
+                // Card cumulative values (what's on the display)
+                stone_dc_cumulative: stoneDC,
+                stone_voucher_cumulative: stoneVoucher,
+                pagbank_cumulative: pagbank,
+                pix_cumulative: pix,
+
+                // Card real values (calculated)
+                stone_dc_real: cardCalculations.stone_dc_real,
+                stone_voucher_real: cardCalculations.stone_voucher_real,
+                pagbank_real: cardCalculations.pagbank_real,
+                pix_real: cardCalculations.pix_real,
+
+                // Totals
+                totalCards,
+                totalCardsSold: cardCalculations.stone_dc_real + cardCalculations.stone_voucher_real +
+                               cardCalculations.pagbank_real + cardCalculations.pix_real,
+
+                // Calculation metadata
+                cardCalculations: cardCalculations.calculations,
+                previousCardValues: previousValues.exists ? {
+                    sameDay: previousValues.sameDay,
+                    stone_dc: previousValues.stone_dc_cumulative,
+                    stone_voucher: previousValues.stone_voucher_cumulative,
+                    pagbank: previousValues.pagbank_cumulative,
+                    pix: previousValues.pix_cumulative
+                } : null,
+
+                // Divergence
+                expectedCash,
+                divergence,
+                divergenceReason,
+
+                notes
+            };
+
+            await closeShift(this.activeShift.id, this.currentUser.id, closingData);
 
             App.showToast('Turno encerrado com sucesso!', 'success');
             this.closeModal('close-shift-modal');
             e.target.reset();
+            this.previousCardValues = null; // Clear cached values
         } catch (error) {
             console.error('Error closing shift:', error);
             App.showToast('Erro ao encerrar turno', 'danger');
@@ -1025,16 +1256,132 @@ const EmployeeController = {
         document.getElementById('summary-expected-cash').textContent = this.formatCurrency(expectedCash);
     },
 
-    calculateDivergence(finalCash) {
+    // Previous card values for calculation
+    previousCardValues: null,
+
+    async initCloseShiftModal() {
         if (!this.activeShift) return;
 
-        const expectedCash = (this.activeShift.initialCash || 0) + (this.activeShift.totalSales || 0) - (this.activeShift.totalWithdrawals || 0);
-        const divergence = finalCash - expectedCash;
+        try {
+            const { getLastClosedShiftCardValues, checkIfShiftCrossesMidnight, getMidnightCrossingInfo } = await import('/js/firebase-config.js');
+
+            // Fetch previous card values
+            this.previousCardValues = await getLastClosedShiftCardValues(this.activeShift.startTime);
+            console.log('Previous card values:', this.previousCardValues);
+
+            // Check midnight crossing
+            const crossesMidnight = checkIfShiftCrossesMidnight(this.activeShift.startTime);
+            const midnightAlert = document.getElementById('midnight-alert');
+
+            if (crossesMidnight && midnightAlert) {
+                const info = getMidnightCrossingInfo(this.activeShift.startTime);
+                midnightAlert.classList.remove('hidden');
+                const midnightInfo = document.getElementById('midnight-info');
+                if (midnightInfo) {
+                    midnightInfo.textContent = `Turno cruzou meia-noite (${info.dayStart} -> ${info.dayEnd}). Valores das maquininhas serao recalculados automaticamente.`;
+                }
+            } else if (midnightAlert) {
+                midnightAlert.classList.add('hidden');
+            }
+
+            // Show previous values info if available
+            const prevValuesInfo = document.getElementById('previous-values-info');
+            if (this.previousCardValues.exists && prevValuesInfo) {
+                prevValuesInfo.classList.remove('hidden');
+                const calcMode = document.getElementById('calculation-mode');
+                if (calcMode) {
+                    if (!this.previousCardValues.sameDay) {
+                        calcMode.textContent = 'Primeiro turno do dia - valores serao usados diretamente';
+                    } else {
+                        calcMode.textContent = `Valores do turno anterior serao subtraidos automaticamente`;
+                        // Populate previous values display
+                        const fmt = (v) => this.formatCurrency(v || 0);
+                        document.getElementById('prev-stone-dc').textContent = fmt(this.previousCardValues.stone_dc_cumulative);
+                        document.getElementById('prev-stone-voucher').textContent = fmt(this.previousCardValues.stone_voucher_cumulative);
+                        document.getElementById('prev-pagbank').textContent = fmt(this.previousCardValues.pagbank_cumulative);
+                        document.getElementById('prev-pix').textContent = fmt(this.previousCardValues.pix_cumulative);
+                    }
+                }
+            } else if (prevValuesInfo) {
+                prevValuesInfo.classList.add('hidden');
+            }
+
+        } catch (error) {
+            console.error('Error initializing close shift modal:', error);
+        }
+
+        // Reset form fields
+        ['cash-notes', 'cash-coins', 'envelope-notes', 'envelope-coins',
+         'card-stone-dc', 'card-stone-voucher', 'card-pagbank', 'card-pix'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+        // Update initial display
+        this.calculateCashRegister();
+    },
+
+    calculateCashRegister() {
+        if (!this.activeShift) return;
+
+        // Get cash values
+        const cashNotes = parseFloat(document.getElementById('cash-notes')?.value) || 0;
+        const cashCoins = parseFloat(document.getElementById('cash-coins')?.value) || 0;
+        const envelopeNotes = parseFloat(document.getElementById('envelope-notes')?.value) || 0;
+        const envelopeCoins = parseFloat(document.getElementById('envelope-coins')?.value) || 0;
+
+        // Get card values
+        const stoneDC = parseFloat(document.getElementById('card-stone-dc')?.value) || 0;
+        const stoneVoucher = parseFloat(document.getElementById('card-stone-voucher')?.value) || 0;
+        const pagbank = parseFloat(document.getElementById('card-pagbank')?.value) || 0;
+        const pix = parseFloat(document.getElementById('card-pix')?.value) || 0;
+
+        // Calculate totals
+        const totalCash = cashNotes + cashCoins;
+        const totalEnvelope = envelopeNotes + envelopeCoins;
+        const cashRemaining = totalCash - totalEnvelope;
+        const totalCards = stoneDC + stoneVoucher + pagbank + pix;
+        const totalGeneral = cashRemaining + totalCards;
+
+        // Update displays
+        const totalCashEl = document.getElementById('total-cash-display');
+        if (totalCashEl) totalCashEl.textContent = this.formatCurrency(totalCash);
+
+        const remainingNotesEl = document.getElementById('remaining-notes-display');
+        if (remainingNotesEl) remainingNotesEl.textContent = this.formatCurrency(cashNotes - envelopeNotes);
+
+        const remainingCoinsEl = document.getElementById('remaining-coins-display');
+        if (remainingCoinsEl) remainingCoinsEl.textContent = this.formatCurrency(cashCoins - envelopeCoins);
+
+        const cashRemainingEl = document.getElementById('cash-remaining-display');
+        if (cashRemainingEl) cashRemainingEl.textContent = this.formatCurrency(cashRemaining);
+
+        const totalCardsEl = document.getElementById('total-cards-display');
+        if (totalCardsEl) totalCardsEl.textContent = this.formatCurrency(totalCards);
+
+        const totalInformedEl = document.getElementById('total-informed');
+        if (totalInformedEl) totalInformedEl.textContent = this.formatCurrency(totalGeneral);
+
+        // Calculate divergence (cash only, cards are separate)
+        this.calculateDivergence(cashRemaining, totalCards);
+    },
+
+    calculateDivergence(cashRemaining, totalCards) {
+        if (!this.activeShift) return;
+
+        const initialCash = this.activeShift.initialCash || 0;
+        const totalSales = this.activeShift.totalSales || 0;
+        const withdrawals = this.activeShift.totalWithdrawals || 0;
+        const expectedCash = initialCash + totalSales - withdrawals;
+
+        // Divergence is what's in cash vs what should be in cash
+        // (Cards are separate and tracked differently)
+        const divergence = cashRemaining - expectedCash;
 
         const alertEl = document.getElementById('divergence-alert');
         const valueEl = document.getElementById('divergence-value');
 
-        if (Math.abs(divergence) > 0.01) {
+        if (Math.abs(divergence) > 0.5) {
             alertEl?.classList.remove('hidden');
             if (valueEl) {
                 valueEl.textContent = (divergence > 0 ? '+' : '') + this.formatCurrency(divergence);
