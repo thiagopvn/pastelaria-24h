@@ -1000,7 +1000,8 @@ async function confirmCloseShift() {
         return;
     }
 
-    const { divergence } = AppState.closingData;
+    const { divergence, envelopeNotes, envelopeCoins } = AppState.closingData;
+    const envelopeTotal = (envelopeNotes || 0) + (envelopeCoins || 0);
     const divergenceReason = document.getElementById('divergence-reason')?.value || '';
     const notes = document.getElementById('shift-notes')?.value || '';
 
@@ -1013,8 +1014,9 @@ async function confirmCloseShift() {
 
     try {
         showLoading();
-        const { closeShift } = await import('./firebase-config.js');
+        const { closeShift, createTransaction } = await import('./firebase-config.js');
 
+        // Close the shift
         await closeShift(
             AppState.activeShift.id,
             AppState.currentUser.id,
@@ -1025,6 +1027,30 @@ async function confirmCloseShift() {
                 closedAt: Date.now()
             }
         );
+
+        // Register envelope value as financial entry (if > 0)
+        if (envelopeTotal > 0) {
+            const shiftDate = new Date(AppState.activeShift.startTime);
+            const formattedDate = shiftDate.toLocaleDateString('pt-BR');
+            const operatorName = AppState.currentUser?.name || 'Operador';
+
+            await createTransaction({
+                type: 'income',
+                category: 'vendas',
+                description: `Envelope Turno ${formattedDate} - ${operatorName}`,
+                amount: envelopeTotal,
+                paymentMethod: 'cash',
+                shiftId: AppState.activeShift.id,
+                operatorId: AppState.currentUser?.id,
+                operatorName: operatorName,
+                details: {
+                    envelopeNotes: envelopeNotes || 0,
+                    envelopeCoins: envelopeCoins || 0,
+                    shiftTotalSales: AppState.activeShift.totalSales || 0,
+                    divergence: divergence
+                }
+            });
+        }
 
         showToast('Turno encerrado com sucesso!', 'success');
         closeCashRegisterModal();
