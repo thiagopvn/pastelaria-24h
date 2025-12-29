@@ -1,162 +1,280 @@
-<!DOCTYPE html>
+<!-- Cash Register Modal Content (loaded dynamically) -->
+<div class="min-h-screen flex flex-col bg-white dark:bg-background-dark">
+    <!-- Header -->
+    <header class="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800">
+        <button id="close-cash-register-btn" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="text-center">
+            <h1 class="font-semibold text-slate-900 dark:text-white">Fechamento de Caixa</h1>
+            <span id="shift-info" class="text-xs text-slate-500 dark:text-slate-400">Carregando...</span>
+        </div>
+        <div class="w-10"></div>
+    </header>
 
-<html class="light" lang="pt-BR"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Fechamento de Caixa</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#2094f3",
-                        "background-light": "#f5f7f8",
-                        "background-dark": "#101a22",
-                        "success": "#16a34a", // Green-600
-                        "warning": "#f59e0b", // Amber-500
-                        "danger": "#dc2626", // Red-600
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
-                },
-            },
-        }
-    </script>
-<style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Hide scrollbar for cleaner mobile look */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-gray-800/50 backdrop-blur-sm flex items-center justify-center min-h-screen w-full p-0 sm:p-4 overflow-hidden">
-<!-- Modal Container -->
-<div class="relative flex flex-col w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md bg-white dark:bg-background-dark sm:rounded-2xl shadow-2xl overflow-hidden group/design-root">
-<!-- Header -->
-<div class="shrink-0 bg-white dark:bg-background-dark border-b border-slate-100 dark:border-slate-800 z-10">
-<div class="flex items-center justify-between px-4 pt-4 pb-2">
-<h3 class="text-[#111518] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-                    Fechamento de Caixa #4092
-                </h3>
-<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-<span class="material-symbols-outlined">close</span>
-</button>
-</div>
-<p class="text-[#60778a] dark:text-slate-400 text-sm font-normal leading-normal pb-3 px-4">
-                Turno: Manhã • 12/05/2024 • Op: João Silva
+    <!-- Scrollable Content -->
+    <main class="flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-32">
+        <!-- Midnight Warning (hidden by default) -->
+        <div id="midnight-warning" class="hidden rounded-xl bg-orange-50 dark:bg-orange-900/20 p-4 border border-orange-200 dark:border-orange-800/50">
+            <div class="flex items-start gap-3">
+                <div class="bg-orange-100 dark:bg-orange-800 rounded-full p-1.5 shrink-0 text-orange-600 dark:text-orange-200">
+                    <span class="material-symbols-outlined text-[20px]">nights_stay</span>
+                </div>
+                <div>
+                    <h4 class="text-base font-bold text-orange-900 dark:text-orange-100 leading-tight">Turno Cruzou Meia-Noite</h4>
+                    <p id="midnight-info" class="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                        As maquininhas de cartao zeram a meia-noite.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shift Summary -->
+        <div class="rounded-xl bg-primary/10 dark:bg-primary/20 p-4 border border-primary/20">
+            <div class="flex items-center gap-2 mb-3 text-primary">
+                <span class="material-symbols-outlined text-[20px]">info</span>
+                <h4 class="text-base font-bold leading-tight">Resumo do Turno</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <p class="text-slate-500 dark:text-slate-400">Caixa Inicial</p>
+                    <p id="summary-initial-cash" class="font-bold text-slate-900 dark:text-white">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 dark:text-slate-400">Total Vendas</p>
+                    <p id="summary-total-sales" class="font-bold text-success">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 dark:text-slate-400">Sangrias</p>
+                    <p id="summary-withdrawals" class="font-bold text-warning">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-slate-500 dark:text-slate-400">Esperado em Caixa</p>
+                    <p id="summary-expected" class="font-bold text-primary">R$ 0,00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Total em Loja (Dinheiro) -->
+        <div class="rounded-xl bg-sky-50 dark:bg-sky-900/20 p-4 border border-sky-100 dark:border-sky-800/50">
+            <div class="flex items-center gap-2 mb-3 text-sky-700 dark:text-sky-300">
+                <span class="material-symbols-outlined text-[20px]">storefront</span>
+                <h4 class="text-base font-bold leading-tight">1. Total em Loja (Dinheiro)</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex flex-col">
+                    <p class="text-sky-900 dark:text-sky-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Cedulas (R$)</p>
+                    <input id="cash-notes" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/50 focus:border-primary border-sky-200 dark:border-sky-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                </label>
+                <label class="flex flex-col">
+                    <p class="text-sky-900 dark:text-sky-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Moedas (R$)</p>
+                    <input id="cash-coins" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/50 focus:border-primary border-sky-200 dark:border-sky-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 2: Retirada para Envelope -->
+        <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 p-4 border border-amber-100 dark:border-amber-800/50">
+            <div class="flex items-center gap-2 mb-3 text-amber-700 dark:text-amber-300">
+                <span class="material-symbols-outlined text-[20px]">payments</span>
+                <h4 class="text-base font-bold leading-tight">2. Retirada p/ Envelope</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex flex-col">
+                    <p class="text-amber-900 dark:text-amber-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Cedulas Env. (R$)</p>
+                    <input id="envelope-notes" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-warning/50 focus:border-warning border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                </label>
+                <label class="flex flex-col">
+                    <p class="text-amber-900 dark:text-amber-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Moedas Env. (R$)</p>
+                    <input id="envelope-coins" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-warning/50 focus:border-warning border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 3: Fica em Caixa (Troco) -->
+        <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-100 dark:border-emerald-800/50">
+            <div class="flex items-center gap-2 mb-3 text-emerald-800 dark:text-emerald-300">
+                <span class="material-symbols-outlined text-[20px]">savings</span>
+                <h4 class="text-base font-bold leading-tight">3. Fica em Caixa (Troco)</h4>
+            </div>
+            <div class="flex flex-col bg-white/60 dark:bg-emerald-900/40 rounded-lg p-3 border border-emerald-200 dark:border-emerald-800/50">
+                <div class="flex justify-between text-sm text-emerald-700 dark:text-emerald-200 mb-1">
+                    <span>Ced: <span id="remaining-notes" class="font-medium">R$ 0,00</span></span>
+                    <span>Moed: <span id="remaining-coins" class="font-medium">R$ 0,00</span></span>
+                </div>
+                <div class="h-px bg-emerald-200 dark:bg-emerald-700 my-2"></div>
+                <div class="flex justify-between items-end">
+                    <span class="text-sm font-semibold text-emerald-800 dark:text-emerald-100 uppercase tracking-wide">Total Caixa</span>
+                    <span id="remaining-total" class="text-xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Maquininhas de Cartao -->
+        <div class="rounded-xl bg-violet-50 dark:bg-violet-900/20 p-4 border border-violet-100 dark:border-violet-800/50">
+            <div class="flex items-center gap-2 mb-2 text-violet-700 dark:text-violet-300">
+                <span class="material-symbols-outlined text-[20px]">credit_card</span>
+                <h4 class="text-base font-bold leading-tight">4. Maquininhas de Cartao</h4>
+            </div>
+            <p class="text-xs text-violet-600 dark:text-violet-400 mb-4">Informe o valor que aparece no VISOR de cada maquininha agora.</p>
+
+            <!-- Previous values info (hidden by default) -->
+            <div id="previous-values-info" class="hidden bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 mb-4 text-sm">
+                <p class="font-medium text-blue-700 dark:text-blue-300 mb-1">
+                    <span class="material-symbols-outlined text-sm align-middle">info</span>
+                    Valores do turno anterior (mesmo dia)
+                </p>
+                <div class="grid grid-cols-2 gap-2 text-xs text-blue-600 dark:text-blue-400">
+                    <span>Stone DC: <span id="prev-stone-dc">R$ 0,00</span></span>
+                    <span>Stone Voucher: <span id="prev-stone-voucher">R$ 0,00</span></span>
+                    <span>PagBank: <span id="prev-pagbank">R$ 0,00</span></span>
+                    <span>PIX: <span id="prev-pix">R$ 0,00</span></span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Stone DC -->
+                <div class="rounded-lg bg-white dark:bg-slate-800/50 p-3 border border-violet-200 dark:border-violet-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-[18px] text-stone-500">credit_card</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">Stone D/C</span>
+                    </div>
+                    <input id="card-stone-dc" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 border-violet-200 dark:border-violet-700 bg-slate-50 dark:bg-slate-900 h-11 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                    <p id="stone-dc-real" class="text-xs text-success mt-1.5 hidden"></p>
+                </div>
+
+                <!-- Stone Voucher -->
+                <div class="rounded-lg bg-white dark:bg-slate-800/50 p-3 border border-violet-200 dark:border-violet-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-[18px] text-orange-500">lunch_dining</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">Stone Voucher</span>
+                    </div>
+                    <input id="card-stone-voucher" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 border-violet-200 dark:border-violet-700 bg-slate-50 dark:bg-slate-900 h-11 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                    <p id="stone-voucher-real" class="text-xs text-success mt-1.5 hidden"></p>
+                </div>
+
+                <!-- PagBank -->
+                <div class="rounded-lg bg-white dark:bg-slate-800/50 p-3 border border-violet-200 dark:border-violet-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-[18px] text-teal-500">contactless</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">PagBank</span>
+                    </div>
+                    <input id="card-pagbank" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 border-violet-200 dark:border-violet-700 bg-slate-50 dark:bg-slate-900 h-11 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                    <p id="pagbank-real" class="text-xs text-success mt-1.5 hidden"></p>
+                </div>
+
+                <!-- PIX -->
+                <div class="rounded-lg bg-white dark:bg-slate-800/50 p-3 border border-violet-200 dark:border-violet-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-[18px] text-cyan-500">qr_code_2</span>
+                        <span class="font-semibold text-slate-800 dark:text-slate-200">PIX</span>
+                    </div>
+                    <input id="card-pix" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 border-violet-200 dark:border-violet-700 bg-slate-50 dark:bg-slate-900 h-11 px-3 text-lg font-medium text-right shadow-sm"
+                           placeholder="0,00"/>
+                    <p id="pix-real" class="text-xs text-success mt-1.5 hidden"></p>
+                </div>
+            </div>
+
+            <!-- Card Sales Summary -->
+            <div id="card-sales-summary" class="hidden mt-4 p-3 bg-violet-100 dark:bg-violet-900/40 rounded-lg border border-violet-200 dark:border-violet-700">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-violet-700 dark:text-violet-300">Total Cartoes (Vendas Reais)</span>
+                    <span id="total-cards-real" class="text-lg font-bold text-violet-700 dark:text-violet-300">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Midnight Values (hidden by default) -->
+        <div id="midnight-values-section" class="hidden rounded-xl bg-orange-50 dark:bg-orange-900/20 p-4 border border-orange-100 dark:border-orange-800/50">
+            <div class="flex items-center gap-2 mb-2 text-orange-700 dark:text-orange-300">
+                <span class="material-symbols-outlined text-[20px]">schedule</span>
+                <h4 class="text-base font-bold leading-tight">5. Vendas ANTES da Meia-Noite</h4>
+            </div>
+            <p class="text-xs text-orange-600 dark:text-orange-400 mb-4">
+                Se voce anotou o valor das maquininhas as 23:59, informe aqui.
             </p>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex flex-col">
+                    <p class="text-orange-900 dark:text-orange-100 text-xs font-semibold pb-1">Stone DC (23:59)</p>
+                    <input id="midnight-stone-dc" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-800 h-10 px-3 text-base font-medium text-right border-orange-200 dark:border-orange-700"
+                           placeholder="0,00"/>
+                </label>
+                <label class="flex flex-col">
+                    <p class="text-orange-900 dark:text-orange-100 text-xs font-semibold pb-1">Stone Voucher (23:59)</p>
+                    <input id="midnight-stone-voucher" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-800 h-10 px-3 text-base font-medium text-right border-orange-200 dark:border-orange-700"
+                           placeholder="0,00"/>
+                </label>
+                <label class="flex flex-col">
+                    <p class="text-orange-900 dark:text-orange-100 text-xs font-semibold pb-1">PagBank (23:59)</p>
+                    <input id="midnight-pagbank" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-800 h-10 px-3 text-base font-medium text-right border-orange-200 dark:border-orange-700"
+                           placeholder="0,00"/>
+                </label>
+                <label class="flex flex-col">
+                    <p class="text-orange-900 dark:text-orange-100 text-xs font-semibold pb-1">PIX (23:59)</p>
+                    <input id="midnight-pix" type="number" step="0.01" min="0" inputmode="decimal"
+                           class="form-input w-full rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-800 h-10 px-3 text-base font-medium text-right border-orange-200 dark:border-orange-700"
+                           placeholder="0,00"/>
+                </label>
+            </div>
+        </div>
+
+        <!-- Divergence Alert (hidden by default) -->
+        <div id="divergence-alert" class="hidden rounded-xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-100 dark:border-red-800/50">
+            <div class="flex items-start gap-3 mb-3">
+                <div class="bg-red-100 dark:bg-red-800 rounded-full p-1 shrink-0 text-danger dark:text-red-200">
+                    <span class="material-symbols-outlined text-[20px]">warning</span>
+                </div>
+                <div>
+                    <h4 class="text-base font-bold text-red-900 dark:text-red-100 leading-tight">Divergencia Detectada</h4>
+                    <p class="text-sm text-red-700 dark:text-red-300 mt-1">Diferenca: <span id="divergence-value" class="font-bold">R$ 0,00</span></p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <label class="block text-xs font-semibold text-red-800 dark:text-red-200 uppercase tracking-wide mb-1.5">Justificativa (obrigatoria)</label>
+                <textarea id="divergence-reason" rows="3"
+                          class="form-textarea w-full rounded-lg text-slate-900 dark:text-white placeholder:text-red-300 dark:placeholder:text-red-700 focus:ring-2 focus:ring-danger/30 focus:border-danger border-red-200 dark:border-red-700 bg-white dark:bg-slate-800 text-sm p-3 resize-none shadow-sm"
+                          placeholder="Descreva o motivo da diferenca..."></textarea>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/30 p-4 border border-slate-200 dark:border-slate-700">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Observacoes (opcional)</label>
+            <textarea id="shift-notes" rows="2"
+                      class="form-textarea w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm p-3 resize-none"
+                      placeholder="Anotacoes sobre o turno..."></textarea>
+        </div>
+
+        <div class="h-4"></div>
+    </main>
+
+    <!-- Sticky Footer -->
+    <div class="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="flex justify-between items-center mb-3">
+            <span class="text-slate-500 dark:text-slate-400">Total Geral</span>
+            <span id="total-informed" class="text-xl font-bold text-slate-900 dark:text-white">R$ 0,00</span>
+        </div>
+        <button id="confirm-close-shift-btn" class="w-full h-12 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+            Confirmar Fechamento
+        </button>
+    </div>
 </div>
-<!-- Scrollable Content -->
-<div class="flex-1 overflow-y-auto no-scrollbar bg-white dark:bg-background-dark px-4 py-4 space-y-5">
-<!-- Section 1: Total em Loja (Blue) -->
-<div class="rounded-xl bg-sky-50 dark:bg-sky-900/20 p-4 border border-sky-100 dark:border-sky-800/50">
-<div class="flex items-center gap-2 mb-3 text-sky-700 dark:text-sky-300">
-<span class="material-symbols-outlined text-[20px]">storefront</span>
-<h4 class="text-base font-bold leading-tight">1. Total em Loja</h4>
-</div>
-<div class="grid grid-cols-2 gap-3">
-<label class="flex flex-col flex-1">
-<p class="text-sky-900 dark:text-sky-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Cédulas (R$)</p>
-<input class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/50 focus:border-primary border-sky-200 dark:border-sky-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm" inputmode="decimal" placeholder="0,00" type="text" value="1.250,00"/>
-</label>
-<label class="flex flex-col flex-1">
-<p class="text-sky-900 dark:text-sky-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Moedas (R$)</p>
-<input class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/50 focus:border-primary border-sky-200 dark:border-sky-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm" inputmode="decimal" placeholder="0,00" type="text" value="84,70"/>
-</label>
-</div>
-</div>
-<!-- Section 2: Retirada (Yellow) -->
-<div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 p-4 border border-amber-100 dark:border-amber-800/50">
-<div class="flex items-center gap-2 mb-3 text-amber-700 dark:text-amber-300">
-<span class="material-symbols-outlined text-[20px]">payments</span>
-<h4 class="text-base font-bold leading-tight">2. Retirada p/ Envelope</h4>
-</div>
-<div class="grid grid-cols-2 gap-3">
-<label class="flex flex-col flex-1">
-<p class="text-amber-900 dark:text-amber-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Cédulas Env. (R$)</p>
-<input class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-warning/50 focus:border-warning border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm" inputmode="decimal" placeholder="0,00" type="text" value="1.050,00"/>
-</label>
-<label class="flex flex-col flex-1">
-<p class="text-amber-900 dark:text-amber-100 text-xs font-semibold uppercase tracking-wide pb-1.5">Moedas Env. (R$)</p>
-<input class="form-input w-full rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-warning/50 focus:border-warning border-amber-200 dark:border-amber-700 bg-white dark:bg-slate-800 h-12 px-3 text-lg font-medium text-right shadow-sm" inputmode="decimal" placeholder="0,00" type="text" value="34,70"/>
-</label>
-</div>
-</div>
-<!-- Section 3: Summary (Green) -->
-<div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-100 dark:border-emerald-800/50">
-<div class="flex items-center justify-between mb-3">
-<div class="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
-<span class="material-symbols-outlined text-[20px]">savings</span>
-<h4 class="text-base font-bold leading-tight">3. Fica em Caixa (Troco)</h4>
-</div>
-</div>
-<div class="flex flex-col bg-white/60 dark:bg-emerald-900/40 rounded-lg p-3 border border-emerald-200 dark:border-emerald-800/50">
-<div class="flex justify-between text-sm text-emerald-700 dark:text-emerald-200 mb-1">
-<span>Céd: <span class="font-medium">R$ 200,00</span></span>
-<span>Moed: <span class="font-medium">R$ 50,00</span></span>
-</div>
-<div class="h-px bg-emerald-200 dark:bg-emerald-700 my-2"></div>
-<div class="flex justify-between items-end">
-<span class="text-sm font-semibold text-emerald-800 dark:text-emerald-100 uppercase tracking-wide">Total Caixa</span>
-<span class="text-xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight">R$ 250,00</span>
-</div>
-</div>
-</div>
-<!-- Alert Box (Red) -->
-<div class="rounded-xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-100 dark:border-red-800/50 animate-pulse-slow">
-<div class="flex items-start gap-3 mb-3">
-<div class="bg-red-100 dark:bg-red-800 rounded-full p-1 shrink-0 text-danger dark:text-red-200">
-<span class="material-symbols-outlined text-[20px]">warning</span>
-</div>
-<div>
-<h4 class="text-base font-bold text-red-900 dark:text-red-100 leading-tight">Divergência Detectada</h4>
-<p class="text-sm text-red-700 dark:text-red-300 mt-1">O valor informado não confere com o sistema. Diferença de: <span class="font-bold">-R$ 15,30</span></p>
-</div>
-</div>
-<div class="mt-3">
-<label class="block text-xs font-semibold text-red-800 dark:text-red-200 uppercase tracking-wide mb-1.5">Justificativa Obrigatória</label>
-<textarea class="form-textarea w-full rounded-lg text-slate-900 dark:text-white placeholder:text-red-300 dark:placeholder:text-red-700 focus:ring-2 focus:ring-danger/30 focus:border-danger border-red-200 dark:border-red-700 bg-white dark:bg-slate-800 text-sm p-3 min-h-[80px] resize-none shadow-sm" placeholder="Descreva o motivo da diferença..."></textarea>
-</div>
-</div>
-<!-- Spacer for scroll -->
-<div class="h-4"></div>
-</div>
-<!-- Sticky Footer -->
-<div class="shrink-0 bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 p-4 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-<div class="flex flex-col gap-3">
-<!-- Primary Action -->
-<button class="w-full h-12 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-[20px]">check_circle</span>
-                    Confirmar Fechamento
-                </button>
-<!-- Secondary Actions -->
-<div class="flex gap-3">
-<button class="flex-1 h-10 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center">
-                        Cancelar
-                    </button>
-<button class="flex-1 h-10 border border-slate-200 dark:border-slate-700 text-primary dark:text-blue-400 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5">
-<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-                        Visualizar PDF
-                    </button>
-</div>
-</div>
-</div>
-</div>
-</body></html>
